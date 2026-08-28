@@ -144,7 +144,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       в футер сайта: покрутите часы и соберите заказ, чтобы увидеть, как это ведёт себя у гостя.</p>
     <div class="meta">
       <span class="tag tag_ok">53 автотеста пройдено</span>
-      <span class="tag">Время московское</span>
+      <span class="tag">Время Ростова-на-Дону</span>
       <span class="tag">Шрифт Jost</span>
       <span class="tag">Без правок в блоках Tilda</span>
     </div>
@@ -173,9 +173,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
         <div class="menu" id="menu-b"></div>
         <span class="eyebrow sec" style="margin-top:18px">Основное меню — подача 13:00–22:00</span>
         <div class="menu" id="menu-m"></div>
+        <span class="eyebrow sec" style="margin-top:18px">Кофе, чай, напитки — к любому заказу</span>
+        <div class="menu" id="menu-d"></div>
         <p class="hint" style="margin-top:12px;color:var(--muted);font-size:12.5px">
-          Завтраки — реальные позиции из выгрузки магазина. Блюда основного меню взяты для примера:
-          система относит к завтракам только то, что перечислено в настройках, всё остальное — основное меню.</p>
+          Завтраки — реальные позиции из выгрузки магазина. Блюда основного меню и напитки взяты для примера:
+          система относит к завтракам только то, что перечислено в настройках, напитки узнаёт по названию,
+          всё остальное — основное меню.</p>
       </section>
 
       <section class="card">
@@ -232,9 +235,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 
   <section class="card" style="margin-top:22px">
     <div class="card__h"><h2>Правила, зашитые в код</h2><span class="hint">меняются в блоке CFG</span></div>
+    <p class="hint" style="margin:-4px 0 14px;color:var(--muted);font-size:13px">
+      Запас времени на кухню гостю нигде не показывается — он только закрывает ближайшие слоты.</p>
     <div class="tblwrap">
       <table class="rules">
-        <thead><tr><th>Категория</th><th>Слоты подачи</th><th>Кухне нужно</th><th>Как это видит гость</th></tr></thead>
+        <thead><tr><th>Категория</th><th>Слоты подачи</th><th>Запас на кухню</th><th>Как это видит гость</th></tr></thead>
         <tbody>
           <tr>
             <td>Завтраки</td>
@@ -247,6 +252,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
             <td class="mono">13:00 … 22:00, каждый час</td>
             <td class="mono">60 мин</td>
             <td>В 12:31 слот 13:00 закрыт — доступен 14:00 и далее. После 21:00 заказ переносится на завтра.</td>
+          </tr>
+          <tr>
+            <td>Кофе, чай, напитки</td>
+            <td class="mono">по времени остального заказа</td>
+            <td class="mono">30 мин</td>
+            <td>Добавляются к любому заказу в любом количестве. Если в заказе только напитки —
+              доступны оба окна подачи: 8:00–10:00 и 13:00–22:00.</td>
           </tr>
           <tr>
             <td>Смешанный заказ</td>
@@ -310,7 +322,11 @@ window.tcart__reDrawCartIcon = function () {};
        1. Завтраки  — слоты 08:00 / 08:30 / 09:00 / 09:30 / 10:00, кухне 30 мин.
        2. Остальное — слоты 13:00 … 22:00 (каждый час),        кухне 60 мин.
           Слот доступен, если ДО него осталось не меньше времени на готовку.
-          (в 7:31 МСК слот 8:00 уже закрыт, доступны 8:30 и далее)
+          (в 7:31 слот 8:00 уже закрыт, доступны 8:30 и далее)
+          Время на приготовление гостю нигде не показывается.
+       2а. Кофе, чай и напитки — нейтральная категория: их можно добавить
+          и к завтраку, и к основному меню. Заказ из одних напитков можно
+          принести в любое рабочее окно (8:00–10:00 и 13:00–22:00).
        3. Пересчёт доступности — в реальном времени, каждую секунду.
        4. Завтраки нельзя смешивать с другими категориями: ошибка показывается
           в момент добавления товара, оформление заказа блокируется.
@@ -417,21 +433,30 @@ window.tcart__reDrawCartIcon = function () {};
   /* ======================== НАСТРОЙКИ ======================== */
   var CFG = {
     tz: 'Europe/Moscow',
+    city: 'Ростов-на-Дону',    /* подпись у часов в корзине */
     daysForward: 1,            /* 1 = «Сегодня» + «Завтра»; 2 = ещё и «Послезавтра» */
     menus: {
       breakfast: {
         key: 'breakfast',
         name: 'Завтраки',
         slots: ['08:00', '08:30', '09:00', '09:30', '10:00'],
-        lead: 30,              /* минут на приготовление */
-        note: 'Завтраки подаём с 8:00 до 10:00. Кухне нужно 30 минут на приготовление, поэтому ближайшие слоты закрываются заранее.'
+        lead: 30,              /* минут на приготовление — гостю не показывается */
+        note: 'Завтраки подаём в номер с 8:00 до 10:00. Свободное время обновляется автоматически.'
       },
       main: {
         key: 'main',
         name: 'Основное меню',
         slots: ['13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00'],
         lead: 60,
-        note: 'Блюда основного меню подаём с 13:00 до 22:00. Кухне нужен 1 час на приготовление, поэтому ближайший слот закрывается заранее.'
+        note: 'Блюда подаём в номер с 13:00 до 22:00. Свободное время обновляется автоматически.'
+      },
+      /* Заказ из одних напитков — оба рабочих окна сразу (слоты собираются ниже) */
+      drinks: {
+        key: 'drinks',
+        name: 'Напитки',
+        slots: [],
+        lead: 30,
+        note: 'Напитки подаём в номер с 8:00 до 10:00 и с 13:00 до 22:00.'
       }
     },
     /* Как система определяет завтрак. Достаточно совпадения по любому пункту.
@@ -451,12 +476,28 @@ window.tcart__reDrawCartIcon = function () {};
       /* страховка на будущее: всё, где в названии или ссылке есть «завтрак/zavtrak» */
       keywords: ['завтрак', 'zavtrak']
     },
+    /* Нейтральные позиции — кофе, чай, напитки. Сочетаются и с завтраками, и с основным меню,
+       в одном заказе их может быть сколько угодно. Проверяются ПОСЛЕ завтраков, поэтому
+       напиток внутри сета («Русский завтрак - Латте») остаётся завтраком.
+       Точные позиции лучше перечислить в ids / slugs / titles, ключевые слова — страховка. */
+    neutral: {
+      ids: [],
+      slugs: [],
+      titles: [],
+      keywords: ['кофе','эспрессо','американо','капучино','латте','раф','флэт уайт','флэт-уайт',
+                 'макиато','мокко','какао','чай','чайник','матча','напиток','напитки',
+                 'вода','морс','сок','лимонад','компот','смузи','коктейль','кола','тоник','квас',
+                 'kofe','espresso','americano','cappuccino','latte','kakao','chai','chay','matcha',
+                 'napitok','napitki','voda','mors','sok','limonad','kompot','smuzi','kokteil','tonik','kvas']
+    },
     fields: { date: 'data_dostavki', time: 'vremya_dostavki' },
     hideNativeFields: true,    /* спрятать штатные поля «дата» и «время» (значения заполняем сами) */
     syncServerTime: true,      /* сверять часы гостя с часами сервера */
     debug: false
   };
   /* ====================== /НАСТРОЙКИ ========================= */
+
+  CFG.menus.drinks.slots = CFG.menus.breakfast.slots.concat(CFG.menus.main.slots);
 
   var MON = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
   var DOW = ['вс','пн','вт','ср','чт','пт','сб'];
@@ -546,6 +587,39 @@ window.tcart__reDrawCartIcon = function () {};
   var BT = [];
   (function () { for (var i = 0; i < CFG.breakfast.titles.length; i++) { BT.push(norm(CFG.breakfast.titles[i])); } })();
 
+  /* Совпадение по отдельному слову: «кофе» находится, «кофейный чизкейк» — нет */
+  var NRE = null;
+  function neutralRe() {
+    if (NRE) { return NRE; }
+    var w = [], i, k;
+    for (i = 0; i < CFG.neutral.keywords.length; i++) {
+      k = norm(CFG.neutral.keywords[i]).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (k) { w.push(k); }
+    }
+    NRE = w.length ? new RegExp('(^|[^0-9a-zа-я])(' + w.join('|') + ')([^0-9a-zа-я]|$)') : /$^/;
+    return NRE;
+  }
+  function isNeutral(p) {
+    if (!p) { return false; }
+    var url = String(p.url || '').toLowerCase(), uid = String(p.uid || ''), name = norm(p.name), i;
+    for (i = 0; i < CFG.neutral.ids.length; i++) {
+      if (url.indexOf(CFG.neutral.ids[i]) !== -1 || uid === CFG.neutral.ids[i]) { return true; }
+    }
+    for (i = 0; i < CFG.neutral.slugs.length; i++) { if (url.indexOf(CFG.neutral.slugs[i]) !== -1) { return true; } }
+    for (i = 0; i < CFG.neutral.titles.length; i++) {
+      var t = norm(CFG.neutral.titles[i]);
+      if (t && name.indexOf(t) === 0) { return true; }
+    }
+    var re = neutralRe();
+    return re.test(name) || re.test(url.replace(/[-_/?=&]/g, ' '));
+  }
+  /* 'breakfast' | 'neutral' | 'main'. Порядок важен: завтрак сильнее напитка. */
+  function kindOf(p) {
+    if (isBreakfast(p)) { return 'breakfast'; }
+    if (isNeutral(p)) { return 'neutral'; }
+    return 'main';
+  }
+
   function isBreakfast(p) {
     if (!p) { return false; }
     var url = String(p.url || ''), uid = String(p.uid || ''), name = norm(p.name), i;
@@ -599,14 +673,16 @@ window.tcart__reDrawCartIcon = function () {};
     return out;
   }
   function analyze() {
-    var ps = cartProducts(), b = 0, m = 0, i;
+    var ps = cartProducts(), b = 0, m = 0, n = 0, i, k;
     for (i = 0; i < ps.length; i++) {
-      if (isBreakfast(ps[i])) { b += 1; } else { m += 1; }
+      k = kindOf(ps[i]);
+      if (k === 'breakfast') { b += 1; } else if (k === 'neutral') { n += 1; } else { m += 1; }
     }
     return {
-      count: ps.length, nb: b, nm: m,
-      conflict: b > 0 && m > 0,
-      menu: (b > 0 && m === 0) ? 'breakfast' : ((m > 0 && b === 0) ? 'main' : null)
+      count: ps.length, nb: b, nm: m, nn: n,
+      conflict: b > 0 && m > 0,   /* напитки не конфликтуют ни с чем */
+      menu: b > 0 ? (m > 0 ? null : 'breakfast')
+                  : (m > 0 ? 'main' : (n > 0 ? 'drinks' : null))
     };
   }
   function cartSign() {
@@ -730,7 +806,7 @@ window.tcart__reDrawCartIcon = function () {};
       '<div class="rsb-body">' +
         '<div class="rsb-slots__head">' +
           '<div class="rsb-slots__title">Время подачи в номер</div>' +
-          '<div class="rsb-clock"><i></i>Москва&nbsp;<b>--:--</b></div>' +
+          '<div class="rsb-clock"><i></i>' + CFG.city + '&nbsp;<b>--:--</b></div>' +
         '</div>' +
         '<div class="rsb-note"></div>' +
         '<div class="rsb-label">Дата</div>' +
@@ -878,8 +954,8 @@ window.tcart__reDrawCartIcon = function () {};
       o.errd.textContent =
         'В корзине ' + st.nb + ' ' + plural(st.nb, 'завтрак', 'завтрака', 'завтраков') +
         ' и ' + st.nm + ' ' + plural(st.nm, 'блюдо', 'блюда', 'блюд') + ' основного меню. ' +
-        'Завтраки готовятся с 8:00 до 10:00, остальные блюда — с 13:00 до 22:00, ' +
-        'поэтому их нельзя объединить в один заказ.';
+        'Завтраки подаём с 8:00 до 10:00, остальные блюда — с 13:00 до 22:00, ' +
+        'поэтому их нельзя объединить в один заказ. Кофе, чай и напитки можно добавить к любому заказу.';
       setNative(o, '', '');
       return;
     }
@@ -955,8 +1031,8 @@ window.tcart__reDrawCartIcon = function () {};
       if (isSel && it.ok) { selValid = true; }
       setCls(el, 'rsb-sel', isSel && it.ok);
       el.title = it.ok
-        ? ('Оформите заказ до ' + hhmm(it.deadline) + ' — кухне нужно ' + menu.lead + ' мин')
-        : ('Уже недоступно: кухне нужно ' + menu.lead + ' мин на приготовление');
+        ? ('Оформите заказ до ' + hhmm(it.deadline))
+        : 'Это время уже недоступно';
     }
     /* выбранный слот «сгорел», пока гость думал */
     if (sel.time && !selValid) {
@@ -965,7 +1041,7 @@ window.tcart__reDrawCartIcon = function () {};
       if (o.__lastExpired !== day.key + expired) {
         o.__lastExpired = day.key + expired;
         toast('Время ' + expired + ' больше недоступно',
-              'Кухне нужно ' + menu.lead + ' минут на приготовление. Выберите другое время.', 'err', 'exp' + expired);
+              'Пожалуйста, выберите другое время подачи.', 'err', 'exp' + expired);
         shake(o.times);
       }
     }
@@ -978,8 +1054,7 @@ window.tcart__reDrawCartIcon = function () {};
       setNative(o, '', '');
     } else if (!sel.time) {
       setStatus(o, '', ICO_INFO,
-        'Выберите время подачи — доступно с <b>' + slots[firstFree].time + '</b>. ' +
-        'Заказ принимаем не позднее чем за ' + menu.lead + ' мин до подачи.');
+        'Выберите время подачи в номер — ближайшее свободное <b>' + slots[firstFree].time + '</b>.');
       setNative(o, '', '');
     } else {
       var cur = null;
@@ -1048,7 +1123,7 @@ window.tcart__reDrawCartIcon = function () {};
       if (p) { shake(p.err); }
     } else if (v.why === 'expired') {
       toast('Время ' + v.time + ' больше недоступно',
-            'Кухне нужно ' + v.lead + ' минут на приготовление. Выберите другое время.', 'err', 'exp-submit');
+            'Пожалуйста, выберите другое время подачи.', 'err', 'exp-submit');
       if (p) { shake(p.times); }
     } else {
       toast('Выберите время подачи', 'Укажите, когда принести заказ в номер.', 'err', 'notime');
@@ -1092,11 +1167,13 @@ window.tcart__reDrawCartIcon = function () {};
       var args = arguments, self = this;
       try {
         var st = analyze();
-        var kind = isBreakfast(product) ? 'breakfast' : 'main';
-        /* Блокируем, только если корзина точно не пуста: если сама Tilda показывает 0 позиций,
+        var kind = kindOf(product);
+        /* Кофе, чай и напитки добавляются к любому заказу и никогда не блокируются.
+           Блокируем, только если корзина точно не пуста: если сама Tilda показывает 0 позиций,
            верим ей и пропускаем товар — конфликт всё равно поймает баннер в корзине.
            Гость никогда не должен упереться в ошибку при пустой корзине. */
-        if (st.menu && st.menu !== kind && st.count > 0 && tildaCartCount() !== 0) {
+        if (kind !== 'neutral' && (st.menu === 'breakfast' || st.menu === 'main') &&
+            st.menu !== kind && st.count > 0 && tildaCartCount() !== 0) {
           var esc = { label: 'Очистить корзину и добавить', run: function () {
             clearCart(function () { f.apply(self, args); schedule(); });
           } };
@@ -1178,7 +1255,7 @@ window.tcart__reDrawCartIcon = function () {};
         выбрано: { дата: sel.day, время: sel.time },
         панелей: panels.length,
         товары: cartProducts().map(function (p) {
-          return { название: p.name, кол: p.quantity, завтрак: isBreakfast(p), ссылка: p.url };
+          return { название: p.name, кол: p.quantity, категория: kindOf(p), ссылка: p.url };
         }),
         сырыеПозиции: raw
       };
@@ -1212,8 +1289,17 @@ window.tcart__reDrawCartIcon = function () {};
     { n: 'Цезарь с курицей', p: 590, uid: '900000000002', u: '/tproduct/900000000002-cezar-s-kuritsei' },
     { n: 'Стейк из лосося с овощами', p: 1290, uid: '900000000003', u: '/tproduct/900000000003-steik-iz-lososya' },
     { n: 'Паста карбонара', p: 620, uid: '900000000004', u: '/tproduct/900000000004-pasta-karbonara' },
-    { n: 'Морс ягодный, 0,5 л', p: 180, uid: '900000000007', u: '/tproduct/900000000007-mors-yagodnii' }
+    { n: 'Пельмени домашние со сметаной', p: 480, uid: '900000000005', u: '/tproduct/900000000005-pelmeni' }
   ];
+  var MENU_D = [
+    { n: 'Капучино', p: 210, uid: '900000000101', u: '/tproduct/900000000101-kapuchino' },
+    { n: 'Эспрессо', p: 150, uid: '900000000102', u: '/tproduct/900000000102-espresso' },
+    { n: 'Чай черный крупнолистовой', p: 180, uid: '900000000103', u: '/tproduct/900000000103-chai-chernii' },
+    { n: 'Какао с маршмеллоу', p: 230, uid: '900000000104', u: '/tproduct/900000000104-kakao' },
+    { n: 'Морс ягодный, 0,5 л', p: 180, uid: '900000000105', u: '/tproduct/900000000105-mors-yagodnii' }
+  ];
+  var DKEYS = {};
+  MENU_D.forEach(function (x) { DKEYS[x.uid] = 1; });
   var BKEYS = {};
   MENU_B.forEach(function (x) { BKEYS[x.uid] = 1; });
 
@@ -1249,6 +1335,7 @@ window.tcart__reDrawCartIcon = function () {};
   }
   MENU_B.forEach(function (i) { $('menu-b').appendChild(dish(i, true)); });
   MENU_M.forEach(function (i) { $('menu-m').appendChild(dish(i, false)); });
+  MENU_D.forEach(function (i) { $('menu-d').appendChild(dish(i, false)); });
 
   function draw() {
     var ps = window.tcart.products, sum = 0;
@@ -1267,7 +1354,8 @@ window.tcart__reDrawCartIcon = function () {};
                     '<button class="rm" type="button" aria-label="Удалить">×</button>';
       r.querySelector('.nm').innerHTML = '<span class="t"></span><span class="kind"></span>';
       r.querySelector('.nm .t').textContent = p.name;
-      r.querySelector('.nm .kind').textContent = BKEYS[p.uid] ? 'Завтрак' : 'Основное меню';
+      r.querySelector('.nm .kind').textContent =
+        BKEYS[p.uid] ? 'Завтрак' : (DKEYS[p.uid] ? 'Напиток' : 'Основное меню');
       r.querySelector('.pr').textContent = (+p.price || 0) + ' р.';
       r.querySelector('.rm').addEventListener('click', function () {
         window.tcart__deleteProduct(i); window.tcart__saveLocalObj(); draw();

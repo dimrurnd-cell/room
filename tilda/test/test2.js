@@ -36,12 +36,11 @@ const ok=(c,m)=>{ c?(pass++,console.log('  ✓ '+m)):(fail++,console.log('  ✗ 
     {name:'Стейк из лосося', url:'https://roomservice-bereza.ru/tproduct/900000000003-steik-iz-lososya'},
     {name:'Паста Карбонара', url:'https://roomservice-bereza.ru/tproduct/900000000004-pasta-karbonara'},
     {name:'Пельмени домашние', url:'https://roomservice-bereza.ru/tproduct/900000000005-pelmeni'},
-    {name:'Чизкейк Нью-Йорк', url:'https://roomservice-bereza.ru/tproduct/900000000006-chizkeik'},
-    {name:'Морс ягодный', url:'https://roomservice-bereza.ru/tproduct/900000000007-mors'}
+    {name:'Чизкейк Нью-Йорк', url:'https://roomservice-bereza.ru/tproduct/900000000006-chizkeik'}
   ];
   let wrong = [];
   mains.forEach(p => { if (d.window.tcart__addProduct(p) === false) { wrong.push(p.name); } else { d.window.tcart.products.pop(); } });
-  ok(wrong.length === 0, wrong.length ? ('ошибочно приняты за завтрак: '+wrong.join(' | ')) : 'все 7 блюд основного меню свободно добавляются в заказ основного меню');
+  ok(wrong.length === 0, wrong.length ? ('ошибочно приняты за завтрак: '+wrong.join(' | ')) : 'все 6 блюд основного меню свободно добавляются в заказ основного меню');
   // и обратная проверка: в корзине завтрак -> те же блюда блокируются
   d = make(msk(2026,8,28,9,0), [{name:'Шакшука',url:'https://roomservice-bereza.ru/tproduct/523668981613-shakshuka',uid:'1'}]); await wait(400);
   const notBlocked = mains.filter(p => d.window.tcart__addProduct(p) !== false);
@@ -64,8 +63,8 @@ const ok=(c,m)=>{ c?(pass++,console.log('  ✓ '+m)):(fail++,console.log('  ✗ 
   console.log('\n20) Гость в часовом поясе UTC+12 (телефон показывает другое число)');
   d = make(msk(2026,8,28,7,31), [{name:'Шакшука',url:'https://roomservice-bereza.ru/tproduct/523668981613-shakshuka',uid:'1'}]); await wait(400);
   ok([...d.window.document.querySelectorAll('.rsb-times .rsb-chip')][0].disabled === true, 'логика МСК не зависит от часового пояса устройства');
-  ok(/Москва/.test(d.window.document.querySelector('.rsb-clock').textContent) &&
-     /07:31/.test(d.window.document.querySelector('.rsb-clock b').textContent), 'часы показывают московское время 07:31');
+  ok(/Ростов-на-Дону/.test(d.window.document.querySelector('.rsb-clock').textContent) &&
+     /07:31/.test(d.window.document.querySelector('.rsb-clock b').textContent), 'часы: Ростов-на-Дону, 07:31');
 
   console.log('\n' + (fail?'✗ ПРОВАЛЕНО: '+fail:'✓ ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ') + '  (успешно: '+pass+')');
   process.exit(fail?1:0);
