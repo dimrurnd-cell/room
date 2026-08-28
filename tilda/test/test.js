@@ -48,9 +48,12 @@ function make(nowTs, products) {
   ${CART_HTML}
   <script>
     window.tcart = { products: ${JSON.stringify(products)}, prodamount: 0, amount: 0 };
+    window.__sync = function () { var c = document.querySelector('.js-carticon-counter');
+      if (c) { c.textContent = window.tcart.products.length ? String(window.tcart.products.length) : ''; } };
+    window.__sync();
     window.__added = [];
-    window.tcart__addProduct = function (p) { window.tcart.products.push(p); window.__added.push(p.name); return true; };
-    window.tcart__deleteProduct = function (i) { window.tcart.products.splice(i, 1); };
+    window.tcart__addProduct = function (p) { window.tcart.products.push(p); window.__added.push(p.name); window.__sync(); return true; };
+    window.tcart__deleteProduct = function (i) { window.tcart.products.splice(i, 1); window.__sync(); };
     window.tcart__saveLocalObj = function () {};
     window.tcart__reDrawProducts = function () {};
     window.tcart__reDrawCartIcon = function () {};

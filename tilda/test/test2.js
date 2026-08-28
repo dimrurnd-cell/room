@@ -8,8 +8,9 @@ function make(nowTs, products) {
   const dom = new JSDOM(`<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
   <script>window.__NOW=${nowTs};Date.now=function(){return window.__NOW;};<\/script>${CART}
   <script>window.tcart={products:${JSON.stringify(products)}};
-  window.tcart__addProduct=function(p){window.tcart.products.push(p);return true;};
-  window.tcart__deleteProduct=function(i){window.tcart.products.splice(i,1);};
+  window.__sync=function(){var c=document.querySelector('.js-carticon-counter');if(c){c.textContent=window.tcart.products.length?String(window.tcart.products.length):'';}};window.__sync();
+  window.tcart__addProduct=function(p){window.tcart.products.push(p);window.__sync();return true;};
+  window.tcart__deleteProduct=function(i){window.tcart.products.splice(i,1);window.__sync();};
   window.tcart__saveLocalObj=function(){};<\/script>${SRC}</body></html>`,
   { runScripts:'dangerously', pretendToBeVisual:true, url:'https://roomservice-bereza.ru/' });
   dom.window.fetch = undefined;
