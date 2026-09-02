@@ -97,6 +97,8 @@ td.good{color:var(--accent);font-weight:500}
 .big .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .big .v{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:500;letter-spacing:-.01em}
 .big .v.acc{color:var(--accent)}
+.tree{background:var(--sunk);border-radius:12px;padding:16px 18px;font-family:'IBM Plex Mono',monospace;
+  font-size:13px;line-height:1.6;overflow-x:auto;margin:0 0 16px;color:var(--ink)}
 .foot{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px;
   font-weight:300;max-width:70ch;line-height:1.55}
 @media (max-width:640px){
@@ -251,23 +253,25 @@ td.good{color:var(--accent);font-weight:500}
   <section>
     <h2>Картинки сайта уже сжаты</h2>
     <p class="sub">Всё, что лежит в выгрузке, пересобрано в WebP и подписано понятными именами.
-      Проверено попиксельно: расхождение с оригиналом на уровне 38–48 дБ — глазом не отличить.
-      Файлы — в папке <code>tilda/images-webp/</code>.</p>
+      Качество выбрано под съёмку еды: на плоских цветах и текстурах отличий от оригинала не видно
+      даже при двукратном увеличении. Файлы — в папке <code>tilda/images-webp/</code>.</p>
     <div class="big">
       <div><div class="k">Было</div><div class="v">4,66 МБ</div></div>
-      <div><div class="k">Стало</div><div class="v acc">0,82 МБ</div></div>
-      <div><div class="k">Экономия</div><div class="v acc">−82%</div></div>
-      <div><div class="k">Фото на главной</div><div class="v acc">−95%</div></div>
+      <div><div class="k">Стало</div><div class="v acc">1,58 МБ</div></div>
+      <div><div class="k">Экономия</div><div class="v acc">−66%</div></div>
+      <div><div class="k">Схожесть</div><div class="v acc">97–100%</div></div>
     </div>
     <div class="tblwrap">
       <table>
-        <thead><tr><th>Файл</th><th>Было</th><th>Стало</th><th>Экономия</th></tr></thead>
-        <tbody><tr><td>Фото: завтрак на подносе в номере — иллюстрация на главной</td><td class="num">2338 КБ</td><td class="num">121 КБ</td><td class="num good">-95%</td></tr><tr><td>Логотип «БЕРЁЗА · доставка блюд в номера», с прозрачностью</td><td class="num">741 КБ</td><td class="num">167 КБ</td><td class="num good">-78%</td></tr><tr><td>Тот же логотип, загружен в Tilda второй раз (файл байт в байт совпадает с 02)</td><td class="num">741 КБ</td><td class="num">167 КБ</td><td class="num good">-78%</td></tr><tr><td>Обложка первого экрана главной страницы</td><td class="num">99 КБ</td><td class="num">26 КБ</td><td class="num good">-74%</td></tr><tr><td>Фото: пельмени на доске</td><td class="num">350 КБ</td><td class="num">210 КБ</td><td class="num good">-40%</td></tr><tr><td>Обложка страницы «Политика обработки персональных данных»</td><td class="num">70 КБ</td><td class="num">21 КБ</td><td class="num good">-70%</td></tr><tr><td>Обложка страницы «Согласие на обработку персональных данных»</td><td class="num">72 КБ</td><td class="num">22 КБ</td><td class="num good">-70%</td></tr><tr><td>Обложка страницы «Согласие на получение рассылки»</td><td class="num">87 КБ</td><td class="num">27 КБ</td><td class="num good">-69%</td></tr><tr><td>Обложка страницы «Пользовательское соглашение»</td><td class="num">64 КБ</td><td class="num">19 КБ</td><td class="num good">-70%</td></tr><tr><td>Обложка страницы «Публичная оферта»</td><td class="num">58 КБ</td><td class="num">18 КБ</td><td class="num good">-70%</td></tr><tr><td>Обложка страницы «Правила применения рекомендательных технологий»</td><td class="num">75 КБ</td><td class="num">22 КБ</td><td class="num good">-70%</td></tr><tr><td>Обложка страницы «Согласие на обработку данных метрическими программами»</td><td class="num">78 КБ</td><td class="num">24 КБ</td><td class="num good">-70%</td></tr></tbody>
+        <thead><tr><th>Файл</th><th>Было</th><th>Стало</th><th>Экономия</th><th>Схожесть</th></tr></thead>
+        <tbody><tr><td>01-foto-zavtrak-na-podnose.webp</td><td class="num">2338 КБ</td><td class="num">338 КБ</td><td class="num good">-86%</td><td class="num">97.2%</td></tr><tr><td>02-logotip-bereza.webp</td><td class="num">741 КБ</td><td class="num">248 КБ</td><td class="num good">-67%</td><td class="num">99.8%</td></tr><tr><td>03-logotip-bereza-dubl.webp</td><td class="num">741 КБ</td><td class="num">248 КБ</td><td class="num good">-67%</td><td class="num">99.8%</td></tr><tr><td>04-oblozhka-glavnoi.jpg</td><td class="num">99 КБ</td><td class="num">—</td><td class="num ">не требуется</td><td class="num">100.0%</td></tr><tr><td>05-foto-pelmeni.jpg</td><td class="num">350 КБ</td><td class="num">—</td><td class="num ">не требуется</td><td class="num">100.0%</td></tr><tr><td>06-oblozhka-politika-dannyh.webp</td><td class="num">70 КБ</td><td class="num">46 КБ</td><td class="num good">-35%</td><td class="num">99.7%</td></tr><tr><td>07-oblozhka-soglasie-dannye.webp</td><td class="num">72 КБ</td><td class="num">48 КБ</td><td class="num good">-34%</td><td class="num">99.7%</td></tr><tr><td>08-oblozhka-soglasie-rassylka.webp</td><td class="num">87 КБ</td><td class="num">59 КБ</td><td class="num good">-32%</td><td class="num">99.7%</td></tr><tr><td>09-oblozhka-polzovatelskoe.webp</td><td class="num">64 КБ</td><td class="num">42 КБ</td><td class="num good">-35%</td><td class="num">99.7%</td></tr><tr><td>10-oblozhka-oferta.webp</td><td class="num">58 КБ</td><td class="num">38 КБ</td><td class="num good">-35%</td><td class="num">99.7%</td></tr><tr><td>11-oblozhka-rekomendatelnye.webp</td><td class="num">75 КБ</td><td class="num">49 КБ</td><td class="num good">-34%</td><td class="num">99.7%</td></tr><tr><td>12-oblozhka-metricheskie.webp</td><td class="num">78 КБ</td><td class="num">52 КБ</td><td class="num good">-33%</td><td class="num">99.7%</td></tr></tbody>
       </table>
     </div>
-    <p class="sub" style="margin-top:16px">Самая крупная находка — фотография завтрака на подносе: 2,3 МБ в PNG
-      при том, что канал прозрачности в ней пустой. То есть обычная фотография сохранена в формате для логотипов.
-      В WebP она весит 121 КБ и выглядит так же. Ещё 1,5 МБ — логотип «Берёза», загруженный в Tilda дважды:
+    <p class="sub" style="margin-top:16px">Две фотографии остались как были: они уже сжаты хорошо, и пересжатие
+      только отняло бы качество ради нескольких процентов веса. Логотипы сжаты почти без потерь — буквы
+      на них должны оставаться идеально резкими. Самая крупная находка — фотография завтрака на подносе:
+      2,3 МБ в PNG при пустом канале прозрачности, то есть обычный снимок в формате для логотипов.
+      В WebP она весит 338 КБ. Ещё 1,5 МБ — логотип «Берёза», загруженный в Tilda дважды:
       два файла с разными именами и одинаковым содержимым.</p>
     <p class="sub">Если сайт на своём хостинге, подключить их можно не трогая вёрстку: скрипт
       <code>images-webp/install.sh</code> кладёт рядом с каждой картинкой её лёгкую версию, а правило из
@@ -285,13 +289,21 @@ td.good{color:var(--accent);font-weight:500}
       <li><code>pip install pillow</code> — один раз.</li>
       <li><code>python3 optimize-photos.py store.csv</code></li>
     </ol>
-    <p class="sub" style="margin-top:16px">Скрипт скачает каждую фотографию, уменьшит до 1600 точек по длинной
-      стороне, сожмёт в WebP и назовёт файл по названию блюда: <code>shakshuka.webp</code>,
-      <code>sytnyi-set-russkii-zavtrak.webp</code>. В папке появятся <code>SPISOK.csv</code> — что во что
-      превратилось и сколько сэкономлено, и <code>IMPORT.csv</code> — та же выгрузка с новыми путями,
-      её можно загрузить обратно в Tilda, если выложить папку с фотографиями на сайт.</p>
-    <p class="sub">Скрипт проверен на вашей выгрузке завтраков: 9 позиций, имена файлов собираются корректно,
-      русские названия переводятся в латиницу. На подставленных картинках вес упал на 84%.</p>
+    <p class="sub" style="margin-top:16px">Скрипт скачает каждую фотографию, сожмёт в WebP и разложит
+      по папкам с названиями разделов меню — так их удобно просматривать и заменять:</p>
+    <pre class="tree">photos/
+  ЗАВТРАКИ/
+    shakshuka.webp
+    sytnyi-set-russkii-zavtrak.webp
+  ГОРЯЧИЕ БЛЮДА/
+    ...
+  SPISOK.csv     что во что превратилось, с процентами и схожестью
+  IMPORT.csv     выгрузка с новыми путями для обратного импорта в Tilda</pre>
+    <p class="sub">Настройки подобраны под еду. По умолчанию качество 95: на фотографии завтрака это
+      338 КБ вместо 2338 КБ при схожести 97%. Если нужно ещё аккуратнее — <code>--preset max</code>,
+      если важнее вес — <code>--preset balance</code>. Три правила берегут качество: картинки с прозрачностью
+      сжимаются почти без потерь, уже оптимальные файлы не трогаются вовсе, уменьшение применяется только
+      к действительно большим кадрам и сопровождается лёгким повышением резкости.</p>
   </section>
 
   <section>

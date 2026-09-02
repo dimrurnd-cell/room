@@ -22,6 +22,10 @@ n=0
 # читаем SPISOK.csv: файл WebP;описание;исходный файл
 tail -n +2 SPISOK.csv | tr -d '\r' | while IFS=';' read -r new descr orig rest; do
   [ -z "$new" ] && continue
+  case "$new" in
+    *.webp) ;;
+    *) echo "  $orig — уже оптимален, замена не нужна"; continue ;;
+  esac
   if [ ! -f "$new" ]; then echo "  нет файла $new"; continue; fi
   if [ ! -f "$DEST/$orig" ]; then echo "  пропуск, на сайте нет $orig"; continue; fi
   cp "$new" "$DEST/$orig.webp"
