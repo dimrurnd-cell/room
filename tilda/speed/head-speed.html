@@ -1,0 +1,76 @@
+<!-- ============================================================================
+     РУМ-СЕРВИС «БЕРЁЗА» — ускорение загрузки. Часть 1: ранние подключения.
+     ----------------------------------------------------------------------------
+     Куда вставлять: Настройки сайта → Ещё → HTML-код для вставки внутрь HEAD.
+     Чем выше в HEAD, тем лучше — эти строки должны выполниться до того,
+     как браузер начнёт грузить каталог и шрифты.
+
+     Что делает: заранее открывает соединения (DNS + TCP + TLS) с доменами,
+     от которых зависит первый экран. Браузер делает это параллельно с разбором
+     страницы, а не последовательно, когда дойдёт до первого запроса.
+     Экономия — один-два круга обмена с сервером на каждый домен: 100–300 мс
+     на обычном канале и до 0,5–1 с через VPN, где каждый круг дороже.
+
+     Безопасно: preconnect ничего не грузит и не меняет вёрстку. Лишний
+     preconnect стоит браузеру одного соединения, которое он закроет сам.
+     ========================================================================= -->
+
+<meta http-equiv="x-dns-prefetch-control" content="on">
+
+<!-- Каталог товаров: список блюд приходит отсюда отдельным запросом,
+     до его ответа карточек на странице нет -->
+<link rel="preconnect" href="https://store.tildaapi.com" crossorigin>
+<link rel="dns-prefetch" href="https://store.tildaapi.com">
+
+<!-- Фотографии блюд -->
+<link rel="preconnect" href="https://static.tildacdn.com" crossorigin>
+<link rel="dns-prefetch" href="https://static.tildacdn.com">
+<link rel="preconnect" href="https://optim.tildacdn.com" crossorigin>
+<link rel="dns-prefetch" href="https://optim.tildacdn.com">
+
+<!-- Скрипты и стили Tilda -->
+<link rel="preconnect" href="https://ws.tildacdn.com" crossorigin>
+<link rel="preconnect" href="https://neo.tildacdn.com" crossorigin>
+
+<!-- Шрифт Jost. Tilda подключает его с fonts.googleapis.com и уже даёт
+     preconnect к gstatic, но не к самому googleapis — а это ещё одно
+     соединение в критическом пути. Лучшее решение — перенести шрифт
+     на свой домен (см. отчёт), тогда обе строки ниже можно удалить. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- ---------------------------------------------------------------------------
+     Шрифт Jost подключается с fonts.googleapis.com без параметра display=swap.
+     Из-за этого браузер прячет ВЕСЬ текст, пока шрифт не скачается, — до трёх
+     секунд пустой страницы, если Google отвечает медленно (обычная история
+     в России без VPN). Строки ниже дописывают display=swap: текст показывается
+     сразу системным шрифтом и подменяется на Jost, когда тот придёт.
+
+     Это лечение симптома. Правильное решение — перенести Jost на свой домен:
+     Настройки сайта → Шрифты → загрузить файлы шрифта. Тогда минус два
+     внешних домена в критическом пути и код ниже можно удалить.
+     ------------------------------------------------------------------------ -->
+<script>
+(function () {
+  'use strict';
+  function fix(link) {
+    try {
+      var h = link.getAttribute('href') || '';
+      if (h.indexOf('fonts.googleapis.com') === -1 || h.indexOf('display=') !== -1) { return; }
+      link.setAttribute('href', h + (h.indexOf('?') === -1 ? '?' : '&') + 'display=swap');
+    } catch (e) {}
+  }
+  function scan() {
+    var l = document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]'), i;
+    for (i = 0; i < l.length; i++) { fix(l[i]); }
+  }
+  scan();
+  /* тег со шрифтом может стоять ниже нашего кода — ловим его появление */
+  try {
+    var mo = new MutationObserver(scan);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () { mo.disconnect(); }, 4000);
+  } catch (e) {}
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', scan); }
+})();
+</script>

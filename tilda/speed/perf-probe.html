@@ -1,0 +1,195 @@
+<!-- ============================================================================
+     РУМ-СЕРВИС «БЕРЁЗА» — ускорение загрузки. Часть 2: замер реальной скорости.
+     ----------------------------------------------------------------------------
+     Куда вставлять: Настройки сайта → Ещё → HTML-код для вставки внутрь BODY.
+     (можно рядом с кодом корзины — они не конфликтуют)
+
+     Зачем: цифры из PageSpeed — это лабораторный тест из дата-центра. Нам нужно
+     знать, сколько ждёт живой гость: с телефона отеля, с мобильного интернета,
+     с включённым VPN и без него. Этот код меряет то, что видит гость.
+
+     Как пользоваться:
+       1. Открыть сайт с адресом ?speed=1 — например
+          https://roomservice-bereza.ru/?speed=1
+          В правом нижнем углу появится панель с замерами. Сделать скриншот.
+       2. Включить VPN, обновить страницу — сравнить цифры.
+       3. Панель выключается кнопкой × или адресом ?speed=0.
+       Обычные гости панель не видят никогда.
+
+     В консоли браузера доступно TSPEED.report() — подробная таблица
+     по каждому домену: сколько запросов и сколько байт.
+
+     Что означают цифры:
+       Ответ сервера   — сколько ждали первый байт страницы (канал и хостинг)
+       Первая отрисовка — когда гость увидел хоть что-то
+       Главный элемент  — когда отрисовался самый крупный блок первого экрана
+       Каталог          — когда появилась первая карточка блюда (главное для меню)
+       Страница готова  — когда догрузилось всё
+     ========================================================================= -->
+
+<script>
+(function () {
+  'use strict';
+  if (window.TSPEED) { return; }
+
+  var t0 = (window.performance && performance.timing && performance.timing.navigationStart) || Date.now();
+  var M = { fcp: null, lcp: null, catalog: null, cards: 0 };
+
+  function nav() {
+    try {
+      var e = performance.getEntriesByType('navigation')[0];
+      if (e) {
+        return { ttfb: e.responseStart, dcl: e.domContentLoadedEventEnd, load: e.loadEventEnd,
+                 html: e.transferSize || 0, proto: e.nextHopProtocol || '—' };
+      }
+      var t = performance.timing;
+      return { ttfb: t.responseStart - t.navigationStart, dcl: t.domContentLoadedEventEnd - t.navigationStart,
+               load: t.loadEventEnd - t.navigationStart, html: 0, proto: '—' };
+    } catch (e) { return { ttfb: 0, dcl: 0, load: 0, html: 0, proto: '—' }; }
+  }
+
+  /* Первая отрисовка и главный элемент экрана */
+  try {
+    new PerformanceObserver(function (l) {
+      l.getEntries().forEach(function (e) { if (e.name === 'first-contentful-paint') { M.fcp = e.startTime; } });
+      draw();
+    }).observe({ type: 'paint', buffered: true });
+  } catch (e) {}
+  try {
+    new PerformanceObserver(function (l) {
+      var es = l.getEntries(); M.lcp = es[es.length - 1].startTime; draw();
+    }).observe({ type: 'largest-contentful-paint', buffered: true });
+  } catch (e) {}
+
+  /* Момент, когда в каталоге появилась первая карточка блюда */
+  var CARD = '.js-catalog-product, .t-catalog__card, .t-store__card, .js-product';
+  function countCards() { try { return document.querySelectorAll(CARD).length; } catch (e) { return 0; } }
+  function checkCatalog() {
+    var n = countCards();
+    if (n > M.cards) { M.cards = n; }
+    if (M.catalog === null && n > 0) {
+      M.catalog = (window.performance && performance.now) ? performance.now() : (Date.now() - t0);
+      draw();
+    }
+  }
+  try {
+    var mo = new MutationObserver(function () { checkCatalog(); });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () { mo.disconnect(); }, 60000);
+  } catch (e) {}
+  setInterval(checkCatalog, 500);
+
+  /* Разбор запросов по доменам */
+  function byHost() {
+    var out = {}, i, r, h, list;
+    try { list = performance.getEntriesByType('resource'); } catch (e) { return out; }
+    for (i = 0; i < list.length; i++) {
+      r = list[i];
+      try { h = new URL(r.name).hostname; } catch (e) { h = '—'; }
+      if (!out[h]) { out[h] = { запросов: 0, байт: 0, мсМакс: 0 }; }
+      out[h].запросов += 1;
+      out[h].байт += (r.transferSize || 0);
+      out[h].мсМакс = Math.max(out[h].мсМакс, Math.round(r.responseEnd));
+    }
+    return out;
+  }
+  function totalBytes() {
+    var h = byHost(), k, s = 0;
+    for (k in h) { if (h.hasOwnProperty(k)) { s += h[k].байт; } }
+    return s + nav().html;
+  }
+  function hostCount() { var h = byHost(), k, n = 0; for (k in h) { if (h.hasOwnProperty(k)) { n += 1; } } return n; }
+
+  function ms(v) {
+    if (v === null || v === undefined) { return '—'; }
+    return v < 1000 ? Math.round(v) + ' мс' : (v / 1000).toFixed(2) + ' с';
+  }
+  function kb(v) {
+    if (!v) { return '—'; }
+    return v < 1048576 ? Math.round(v / 1024) + ' КБ' : (v / 1048576).toFixed(2) + ' МБ';
+  }
+
+  window.TSPEED = {
+    data: function () {
+      var n = nav();
+      return { ответСервера: n.ttfb, перваяОтрисовка: M.fcp, главныйЭлемент: M.lcp,
+               каталог: M.catalog, карточек: M.cards, страницаГотова: n.load,
+               протокол: n.proto, доменов: hostCount(), всегоБайт: totalBytes() };
+    },
+    report: function () {
+      var d = this.data();
+      console.log('%c Скорость страницы ', 'background:#000;color:#fff;padding:2px 6px;border-radius:3px');
+      console.log('Ответ сервера:', ms(d.ответСервера), '| Первая отрисовка:', ms(d.перваяОтрисовка),
+                  '| Главный элемент:', ms(d.главныйЭлемент));
+      console.log('Каталог (первая карточка):', ms(d.каталог), '| карточек:', d.карточек,
+                  '| Страница готова:', ms(d.страницаГотова));
+      console.log('Протокол:', d.протокол, '| доменов:', d.доменов, '| передано:', kb(d.всегоБайт));
+      if (console.table) { console.table(byHost()); }
+      return d;
+    },
+    hosts: byHost,
+    panel: function (on) {
+      try { localStorage.setItem('tspeed', on ? '1' : '0'); } catch (e) {}
+      if (on) { draw(true); } else if (box && box.parentNode) { box.parentNode.removeChild(box); box = null; }
+      return on ? 'панель включена' : 'панель выключена';
+    }
+  };
+
+  /* --- экранная панель --- */
+  var box = null;
+  function wanted() {
+    var q = location.search;
+    if (/[?&]speed=1/.test(q)) { try { localStorage.setItem('tspeed', '1'); } catch (e) {} return true; }
+    if (/[?&]speed=0/.test(q)) { try { localStorage.setItem('tspeed', '0'); } catch (e) {} return false; }
+    try { return localStorage.getItem('tspeed') === '1'; } catch (e) { return false; }
+  }
+  function row(k, v, big) {
+    return '<div class="tsp__r' + (big ? ' tsp__r_big' : '') + '"><span>' + k + '</span><b>' + v + '</b></div>';
+  }
+  function draw(force) {
+    if (!force && !wanted()) { return; }
+    if (!document.body) { return; }
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'tspeed';
+      var css = document.createElement('style');
+      css.textContent = (
+        '#tspeed{position:fixed;z-index:2147483000;right:14px;bottom:14px;width:270px;background:#111;color:#fff;' +
+        'border-radius:14px;padding:14px 16px;font-family:Jost,Arial,sans-serif;font-size:13px;line-height:1.35;' +
+        'box-shadow:0 14px 40px rgba(0,0,0,.35)}' +
+        '#tspeed .tsp__h{display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.1em;' +
+        'text-transform:uppercase;opacity:.55;margin-bottom:10px}' +
+        '#tspeed .tsp__x{background:none;border:0;color:#fff;opacity:.6;cursor:pointer;font-size:16px;line-height:1;padding:0 2px}' +
+        '#tspeed .tsp__r{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.09)}' +
+        '#tspeed .tsp__r:last-child{border-bottom:0}' +
+        '#tspeed .tsp__r span{opacity:.65}' +
+        '#tspeed .tsp__r b{font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}' +
+        '#tspeed .tsp__r_big b{font-size:15px}' +
+        '#tspeed .tsp__f{margin-top:9px;font-size:11px;opacity:.45;line-height:1.4}');
+      (document.head || document.documentElement).appendChild(css);
+      box.innerHTML = '<div class="tsp__b"></div>';
+      document.body.appendChild(box);
+      var x = document.createElement('button');
+      x.type = 'button'; x.className = 'tsp__x'; x.textContent = '×';
+      x.addEventListener('click', function () { window.TSPEED.panel(false); });
+      box.__x = x;
+    }
+    var d = window.TSPEED.data();
+    box.querySelector('.tsp__b').innerHTML =
+      '<div class="tsp__h"><span>Скорость</span></div>' +
+      row('Ответ сервера', ms(d.ответСервера)) +
+      row('Первая отрисовка', ms(d.перваяОтрисовка)) +
+      row('Главный элемент', ms(d.главныйЭлемент)) +
+      row('Каталог', ms(d.каталог) + (d.карточек ? ' · ' + d.карточек : ''), true) +
+      row('Страница готова', ms(d.страницаГотова)) +
+      row('Передано', kb(d.всегоБайт)) +
+      row('Доменов / протокол', d.доменов + ' · ' + d.протокол) +
+      '<div class="tsp__f">TSPEED.report() в консоли — разбор по доменам. Скрыть: ?speed=0</div>';
+    box.querySelector('.tsp__h').appendChild(box.__x);
+  }
+
+  function start() { draw(); setTimeout(draw, 1500); setTimeout(draw, 4000); setTimeout(draw, 9000); }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', start); } else { start(); }
+  window.addEventListener('load', function () { setTimeout(draw, 300); });
+})();
+</script>

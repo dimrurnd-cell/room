@@ -1,0 +1,142 @@
+# =============================================================================
+#  РУМ-СЕРВИС «БЕРЁЗА» — .htaccess с сжатием и кэшированием
+# -----------------------------------------------------------------------------
+#  Нужен ТОЛЬКО если сайт отдаётся с вашего хостинга (выгрузка Tilda по FTP).
+#  Как проверить: открыть сайт → правая кнопка → «Исходный код страницы» →
+#  найти строку со скриптом. Если там src="js/tilda-scripts-3.0.min.js" —
+#  это ваш хостинг, файл нужен. Если src="https://static.tildacdn.com/js/..." —
+#  сайт живёт на Tilda, и этот файл не нужен: сжатие и кэш там уже настроены.
+#
+#  Как поставить: заменить содержимое файла .htaccess в корне сайта.
+#  Первый блок — ваши прежние правила, они сохранены без изменений.
+#  Перед заменой сохраните копию текущего файла.
+# =============================================================================
+
+# ------------------------- ПРЕЖНИЕ ПРАВИЛА (без изменений) -------------------
+ErrorDocument 403 /404.html
+ErrorDocument 404 /404.html
+
+DirectoryIndex page196203209.html
+
+RewriteEngine On
+
+RewriteCond %{HTTP:X-Forwarded-Proto} =http
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+RewriteCond %{REQUEST_FILENAME} /robots.txt
+RewriteCond "%{DOCUMENT_ROOT}/robots_%{HTTP_HOST}.txt" -f
+RewriteRule ^(.*)$ robots_%{HTTP_HOST}.txt [NC,L]
+RewriteRule ^thanks$ page106300706.html [NC]
+RewriteRule ^thanks/$ page106300706.html [NC]
+
+RewriteRule ^oferta$ page196204709.html [NC]
+RewriteRule ^oferta/$ page196204709.html [NC]
+
+RewriteRule ^policy$ page196204909.html [NC]
+RewriteRule ^policy/$ page196204909.html [NC]
+
+RewriteRule ^soglasie$ page196205609.html [NC]
+RewriteRule ^soglasie/$ page196205609.html [NC]
+
+RewriteRule ^header$ page204404409.html [NC]
+RewriteRule ^header/$ page204404409.html [NC]
+
+RewriteRule ^footer$ page204404509.html [NC]
+RewriteRule ^footer/$ page204404509.html [NC]
+
+RewriteRule ^members/ ma_start.html [NC,L]
+
+
+# ============================ НОВОЕ: СЖАТИЕ ==================================
+# Страница весит 110 КБ текстом, скрипты и стили Tilda — ещё сотни килобайт.
+# Сжатие уменьшает их примерно в 4 раза. Это самая дешёвая правка на сайте.
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/xml text/css
+  AddOutputFilterByType BROTLI_COMPRESS application/javascript application/x-javascript text/javascript
+  AddOutputFilterByType BROTLI_COMPRESS application/json application/xml image/svg+xml
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript text/javascript
+  AddOutputFilterByType DEFLATE application/json application/xml image/svg+xml
+  AddOutputFilterByType DEFLATE font/ttf font/otf application/vnd.ms-fontobject
+  # Картинки, шрифты woff/woff2, архивы и видео уже сжаты — не тратим на них процессор
+  SetEnvIfNoCase Request_URI \.(?:jpe?g|png|gif|webp|avif|ico|woff2?|zip|gz|mp4|webm)$ no-gzip dont-vary
+  Header append Vary Accept-Encoding env=!dont-vary
+</IfModule>
+
+
+# ========================= НОВОЕ: КЭШИРОВАНИЕ ================================
+# Гость отеля заходит в меню несколько раз за проживание. Сейчас браузер каждый
+# раз перекачивает все 35 файлов Tilda заново. С кэшем повторный заход — почти
+# мгновенный, и это работает одинаково с VPN и без него.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault                          "access plus 1 month"
+
+  # Скрипты и стили Tilda версионируются в имени файла и в ?t=... — можно надолго
+  ExpiresByType text/css                  "access plus 1 year"
+  ExpiresByType application/javascript    "access plus 1 year"
+  ExpiresByType text/javascript           "access plus 1 year"
+
+  # Картинки и шрифты
+  ExpiresByType image/jpeg                "access plus 1 year"
+  ExpiresByType image/png                 "access plus 1 year"
+  ExpiresByType image/webp                "access plus 1 year"
+  ExpiresByType image/avif                "access plus 1 year"
+  ExpiresByType image/svg+xml             "access plus 1 year"
+  ExpiresByType image/x-icon              "access plus 1 year"
+  ExpiresByType font/woff2                "access plus 1 year"
+  ExpiresByType font/woff                 "access plus 1 year"
+  ExpiresByType font/ttf                  "access plus 1 year"
+
+  # Сами страницы — не кэшируем: правки в конструкторе должны быть видны сразу
+  ExpiresByType text/html                 "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|jpe?g|png|gif|webp|avif|svg|ico|woff2?|ttf|otf|eot)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+  # ETag не нужен: датой изменения и Cache-Control мы управляем точнее
+  Header unset ETag
+  # Немного безопасности заодно
+  Header set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+FileETag None
+
+<IfModule mod_headers.c>
+  Header set Connection keep-alive
+</IfModule>
+
+
+# ===================== НОВОЕ: WEBP ВМЕСТО JPEG И PNG =========================
+# Если рядом с фото положить файл с тем же именем и расширением .webp
+# (photo.png → photo.png.webp), сервер отдаст лёгкую версию тем браузерам,
+# которые её понимают, — а это сегодня практически все. Без .webp-файлов
+# правило просто ничего не делает.
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP_ACCEPT} image/webp
+  RewriteCond %{REQUEST_FILENAME} \.(jpe?g|png)$
+  RewriteCond %{REQUEST_FILENAME}\.webp -f
+  RewriteRule ^(.+)$ $1.webp [T=image/webp,E=WEBP:1,L]
+</IfModule>
+<IfModule mod_headers.c>
+  Header append Vary Accept env=WEBP
+</IfModule>
+
+
+# ============================ ТИПЫ ФАЙЛОВ ====================================
+<IfModule mod_mime.c>
+  AddType image/webp                 .webp
+  AddType image/avif                 .avif
+  AddType font/woff2                 .woff2
+  AddType font/woff                  .woff
+  AddType application/javascript     .js
+  AddType image/svg+xml              .svg
+</IfModule>
