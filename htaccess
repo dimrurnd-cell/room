@@ -31,4 +31,33 @@ RewriteRule ^footer/$ page204404509.html [NC]
 
 RewriteRule ^members/ ma_start.html [NC,L]
 
+RewriteCond %{HTTP:X-Forwarded-Proto} =http
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+RewriteCond %{REQUEST_FILENAME} /robots.txt
+RewriteCond "%{DOCUMENT_ROOT}/robots_%{HTTP_HOST}.txt" -f
+RewriteRule ^(.*)$ robots_%{HTTP_HOST}.txt [NC,L]
+RewriteRule ^thanks$ page106300706.html [NC]
+RewriteRule ^thanks/$ page106300706.html [NC]
+
+RewriteRule ^oferta$ page196204709.html [NC]
+RewriteRule ^oferta/$ page196204709.html [NC]
+
+RewriteRule ^policy$ page196204909.html [NC]
+RewriteRule ^policy/$ page196204909.html [NC]
+
+RewriteRule ^soglasie$ page196205609.html [NC]
+RewriteRule ^soglasie/$ page196205609.html [NC]
+
+RewriteRule ^header$ page204404409.html [NC]
+RewriteRule ^header/$ page204404409.html [NC]
+
+RewriteRule ^footer$ page204404509.html [NC]
+RewriteRule ^footer/$ page204404509.html [NC]
+
+RewriteRule ^members/ ma_start.html [NC,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(?:[a-z0-9_-]+(?:\/[a-z0-9_-]+)*)?\/?$ http://127.0.0.1:39216/tcatalog%{REQUEST_URI} [P,L,QSA]
 
