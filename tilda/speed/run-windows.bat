@@ -1,48 +1,39 @@
 @echo off
-chcp 65001 >nul
-setlocal
+rem =============================================================
+rem   Podgotovka fotografiy blyud dlya sayta
+rem   Etot fayl tolko zapuskaet Python. Vse soobscheniya - vnutri.
+rem   Vnimanie: fayl dolzhen ostavatsya bez russkih bukv,
+rem   inache cmd.exe lomaet razbor komand.
+rem =============================================================
 cd /d "%~dp0"
 
-echo ============================================================
-echo   Подготовка фотографий блюд для сайта
-echo ============================================================
-echo.
-
-rem --- ищем выгрузку: либо перетащили на файл, либо лежит рядом ---
-set "CSV=%~1"
-if "%CSV%"=="" for %%F in ("*.csv") do if not defined CSV set "CSV=%%~fF"
-if "%CSV%"=="" (
-  echo Не найдена выгрузка товаров.
-  echo Положите CSV из Tilda в эту же папку или перетащите его мышкой
-  echo на файл run-windows.bat
+if not exist "optimize-photos.py" (
+  echo.
+  echo   Fayl optimize-photos.py ne nayden ryadom s etim faylom.
+  echo   Polozhite optimize-photos.py i run-windows.bat v odnu papku.
   echo.
   pause
   exit /b 1
 )
 
-rem --- ищем Python ---
-set "PY=python"
-%PY% --version >nul 2>&1
-if errorlevel 1 set "PY=py"
-%PY% --version >nul 2>&1
-if errorlevel 1 (
-  echo Не найден Python.
-  echo Установите его с https://www.python.org/downloads/
-  echo При установке обязательно поставьте галочку "Add python.exe to PATH".
+set "PY="
+python -c "import sys" >nul 2>&1 && set "PY=python"
+if not defined PY (
+  py -c "import sys" >nul 2>&1 && set "PY=py"
+)
+
+if not defined PY (
+  echo.
+  echo   Python ne nayden.
+  echo.
+  echo   1^) Skachayte Python: https://www.python.org/downloads/
+  echo   2^) Pri ustanovke postavte galochku "Add python.exe to PATH"
+  echo   3^) Perezapustite etot fayl
   echo.
   pause
   exit /b 1
 )
 
-echo Проверяю библиотеку для картинок...
-%PY% -m pip install --quiet --disable-pip-version-check pillow
+%PY% optimize-photos.py --auto %*
 
-echo.
-echo Обрабатываю: %CSV%
-echo Это займёт от пары минут — фотографии скачиваются с серверов Tilda.
-echo.
-%PY% optimize-photos.py "%CSV%"
-
-echo.
-echo Готовые файлы — в папке photos рядом с этим файлом.
-pause
+if errorlevel 1 pause

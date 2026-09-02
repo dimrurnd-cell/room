@@ -31,10 +31,65 @@
 
 import argparse, csv, io, os, re, sys, math, urllib.request, urllib.error
 
-try:
-    from PIL import Image
-except ImportError:
-    sys.exit('Не хватает библиотеки Pillow. Установите её командой:  pip install pillow')
+Image = None
+
+
+def ensure_pillow():
+    """Проверить библиотеку для картинок и поставить её, если её нет."""
+    global Image
+    try:
+        from PIL import Image as _I
+        Image = _I
+        return
+    except ImportError:
+        pass
+    print('Устанавливаю библиотеку для работы с картинками (один раз)...')
+    import subprocess
+    for args in (['-m', 'pip', 'install', '--quiet', 'pillow'],
+                 ['-m', 'pip', 'install', '--quiet', '--user', 'pillow']):
+        try:
+            if subprocess.call([sys.executable] + args) == 0:
+                break
+        except Exception:
+            pass
+    try:
+        from PIL import Image as _I
+        Image = _I
+    except ImportError:
+        wait_and_exit('Не удалось установить библиотеку Pillow.\n'
+                      'Откройте командную строку и выполните:  pip install pillow')
+
+
+def wait_and_exit(msg, code=1):
+    print('\n' + msg)
+    try:
+        input('\nНажмите Enter, чтобы закрыть окно...')
+    except Exception:
+        pass
+    sys.exit(code)
+
+
+def pick_csv(folder):
+    """Найти выгрузку товаров рядом со скриптом."""
+    files = sorted(f for f in os.listdir(folder) if f.lower().endswith('.csv'))
+    files = [f for f in files if f not in ('SPISOK.csv', 'IMPORT.csv')]
+    if not files:
+        wait_and_exit('Рядом со скриптом нет ни одного файла .csv.\n\n'
+                      'Что делать:\n'
+                      '  1. Откройте Tilda → Магазин → Товары → Экспорт\n'
+                      '  2. Скачайте файл выгрузки\n'
+                      '  3. Положите его в эту же папку и запустите снова')
+    if len(files) == 1:
+        print('Нашёл выгрузку: %s\n' % files[0])
+        return os.path.join(folder, files[0])
+    print('Рядом лежит несколько файлов .csv:\n')
+    for i, f in enumerate(files, 1):
+        print('  %d. %s' % (i, f))
+    try:
+        n = int(input('\nВведите номер нужного и нажмите Enter: ').strip())
+        return os.path.join(folder, files[n - 1])
+    except Exception:
+        wait_and_exit('Не понял номер. Запустите ещё раз.')
 
 TRANS = {
     'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'i',
@@ -102,14 +157,28 @@ def convert(data, dst, quality, maxside):
 
 def main():
     p = argparse.ArgumentParser(add_help=True)
-    p.add_argument('csvfile', help='выгрузка товаров из Tilda')
+    p.add_argument('csvfile', nargs='?', help='выгрузка товаров из Tilda')
     p.add_argument('--out', default='photos')
     p.add_argument('--quality', type=int, default=82)
     p.add_argument('--max', type=int, default=1600, dest='maxside')
     p.add_argument('--local', default=None, help='брать файлы из папки, а не скачивать')
     p.add_argument('--limit', type=int, default=0)
+    p.add_argument('--auto', action='store_true',
+                   help='сам найти выгрузку рядом со скриптом и доустановить нужную библиотеку')
     a = p.parse_args()
 
+    here = os.path.dirname(os.path.abspath(__file__))
+    if a.auto:
+        ensure_pillow()
+        if not a.csvfile:
+            a.csvfile = pick_csv(here)
+        if not os.path.isabs(a.out):
+            a.out = os.path.join(here, a.out)
+    if not a.csvfile:
+        p.error('укажите файл выгрузки: python optimize-photos.py store.csv')
+
+    if Image is None:
+        ensure_pillow()
     rows, enc, delim = read_rows(a.csvfile)
     os.makedirs(a.out, exist_ok=True)
     print('Прочитано строк: %d (кодировка %s, разделитель "%s")\n' % (len(rows), enc, delim))
@@ -186,6 +255,11 @@ def main():
         print('  • нет интернета или он идёт через прокси, который блокирует static.tildacdn.com;')
         print('  • включён VPN, через который сервер Tilda недоступен — попробуйте выключить;')
         print('  • в выгрузке колонка Photo пустая — возьмите экспорт из раздела Магазин → Товары.')
+    if a.auto:
+        try:
+            input('\nГотово. Нажмите Enter, чтобы закрыть окно...')
+        except Exception:
+            pass
 
 if __name__ == '__main__':
     main()
