@@ -48,7 +48,22 @@ function make(nowTs, products) {
   ${CART_HTML}
   <script>
     window.tcart = { products: ${JSON.stringify(products)}, prodamount: 0, amount: 0 };
-    window.__sync = function () { var c = document.querySelector('.js-carticon-counter');
+    window.__recalc = function () {
+      var n = 0;
+      window.tcart.products.forEach(function (p) { if (p) { n += (parseFloat(p.price) || 0) * (p.quantity || 1); } });
+      window.tcart.prodamount = n;
+      var a = n;
+      if (window.tcart.delivery && window.tcart.delivery.price > 0) { a += +window.tcart.delivery.price; }
+      window.tcart.amount = a;
+    };
+    window.tcart__updateTotalProductsinCartObj = function () { window.__recalc(); };
+    window.tcart__reDrawTotal = function () {
+      var e = document.querySelector('.t706__cartwin-prodamount');
+      if (e) { e.textContent = String(window.tcart.prodamount); }
+      var t = document.querySelector('.t706__cartwin-totalamount');
+      if (t) { t.textContent = String(window.tcart.amount); }
+    };
+    window.__sync = function () { window.__recalc(); var c = document.querySelector('.js-carticon-counter');
       if (c) { c.textContent = window.tcart.products.length ? String(window.tcart.products.length) : ''; } };
     window.__sync();
     window.__added = [];
@@ -117,9 +132,10 @@ const val = (d, n) => d.window.document.querySelector('input[name="' + n + '"]')
   console.log('\n3) ОСНОВНОЕ МЕНЮ, 12:31 МСК — 13:00 закрыт, 14:00 открыт');
   d = make(msk(2026, 8, 28, 12, 31), [P.borsch]); await wait(400);
   t = times(d);
-  ok(t.length === 10 && t[0].txt === '13:00' && t[9].txt === '22:00', 'слоты 13:00–22:00 (10 шт)');
+  ok(t.length === 19 && t[0].txt === '13:00' && t[18].txt === '22:00', 'слоты 13:00–22:00 через полчаса (19 шт)');
   ok(t[0].off === true, '13:00 недоступно');
-  ok(t[1].off === false, '14:00 доступно');
+  ok(t[1].off === true, '13:30 недоступно (нужен час на приготовление)');
+  ok(t[2].off === false, '14:00 доступно');
 
   console.log('\n4) ОСНОВНОЕ МЕНЮ, 12:00 МСК — 13:00 ещё доступен');
   d = make(msk(2026, 8, 28, 12, 0), [P.borsch]); await wait(400);
@@ -136,7 +152,7 @@ const val = (d, n) => d.window.document.querySelector('input[name="' + n + '"]')
   ok(daysC(d)[0].off === true, '«Сегодня» закрыто (последний слот 22:00 требует часа)');
   ok(daysC(d)[1].sel === true, 'выбрано «Завтра»');
   d = make(msk(2026, 8, 28, 20, 59), [P.steak]); await wait(400);
-  ok(daysC(d)[0].sel === true && times(d)[9].off === false, 'в 20:59 слот 22:00 ещё доступен на сегодня');
+  ok(daysC(d)[0].sel === true && times(d)[18].off === false, 'в 20:59 слот 22:00 ещё доступен на сегодня');
 
   console.log('\n7) Смешивание категорий');
   d = make(msk(2026, 8, 28, 9, 0), [P.breakfastSet, P.borsch]); await wait(400);

@@ -8,7 +8,12 @@ function make(nowTs, products) {
   const dom = new JSDOM(`<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
   <script>window.__NOW=${nowTs};Date.now=function(){return window.__NOW;};<\/script>${CART}
   <script>window.tcart={products:${JSON.stringify(products)}};
-  window.__sync=function(){var c=document.querySelector('.js-carticon-counter');
+  window.__recalc=function(){var n=0;window.tcart.products.forEach(function(p){if(p){n+=(parseFloat(p.price)||0)*(p.quantity||1);}});
+    window.tcart.prodamount=n;var a=n;if(window.tcart.delivery&&window.tcart.delivery.price>0){a+=+window.tcart.delivery.price;}window.tcart.amount=a;};
+  window.tcart__updateTotalProductsinCartObj=function(){window.__recalc();};
+  window.tcart__reDrawTotal=function(){var e=document.querySelector('.t706__cartwin-prodamount');if(e){e.textContent=String(window.tcart.prodamount);}
+    var t=document.querySelector('.t706__cartwin-totalamount');if(t){t.textContent=String(window.tcart.amount);}};
+  window.__sync=function(){window.__recalc();var c=document.querySelector('.js-carticon-counter');
     if(c){c.textContent=window.tcart.products.length?String(window.tcart.products.length):'';}};window.__sync();
   window.tcart__addProduct=function(p){window.tcart.products.push(p);window.__sync();return true;};
   window.tcart__deleteProduct=function(i){window.tcart.products.splice(i,1);window.__sync();};
@@ -52,7 +57,7 @@ const kind = (d, p) => d.window.RSB ? null : null;
   d = make(msk(2026,8,28,14,0), [BORSCH]); await wait(400);
   bad = DRINKS.filter(x => d.window.tcart__addProduct(x) === false);
   ok(bad.length === 0, 'все 10 напитков добавились к основному меню');
-  ok(times(d).length === 10, 'время подачи — по правилам основного меню (10 слотов)');
+  ok(times(d).length === 19, 'время подачи — по правилам основного меню (19 слотов через полчаса)');
 
   console.log('\n29) Два кофе в одном заказе');
   d = make(msk(2026,8,28,9,0), [BREAKFAST]); await wait(400);
@@ -77,15 +82,15 @@ const kind = (d, p) => d.window.RSB ? null : null;
 
   console.log('\n32) Заказ из одних напитков — оба рабочих окна');
   d = make(msk(2026,8,28,9,0), [P('Капучино','kapuchino'), P('Капучино','kapuchino')]); await wait(400);
-  ok(d.window.RSB.state().разбор.menu === 'drinks', 'режим «напитки»');
-  ok(times(d).length === 15, 'слотов 15: ' + times(d).join(' '));
+  ok(d.window.RSB.state().разбор.menu === 'anytime', 'режим «в любое время»');
+  ok(times(d).length === 24, 'слотов 24 (оба окна): ' + times(d).slice(0,7).join(' ') + ' …');
   ok(/8:00 до 10:00 и с 13:00 до 22:00/.test(d.window.document.querySelector('.rsb-note').textContent),
      'подсказка: ' + d.window.document.querySelector('.rsb-note').textContent);
 
   console.log('\n33) Только кофе в 12:31 — 13:00 закрыт, 14:00 открыт');
   d = make(msk(2026,8,28,12,31), [P('Латте','latte')]); await wait(400);
   let t = times(d);
-  ok(t[5] === '13:00✗' && t[6] === '14:00✓', 'слоты: ' + t.slice(5,8).join(' '));
+  ok(t[5] === '13:00✗' && t[6] === '13:30✓', 'слоты: ' + t.slice(5,8).join(' '));
 
   console.log('\n34) Только кофе в 09:45 — утро закрыто, день доступен сегодня');
   d = make(msk(2026,8,28,9,45), [P('Американо','americano')]); await wait(400);

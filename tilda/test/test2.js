@@ -8,7 +8,12 @@ function make(nowTs, products) {
   const dom = new JSDOM(`<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
   <script>window.__NOW=${nowTs};Date.now=function(){return window.__NOW;};<\/script>${CART}
   <script>window.tcart={products:${JSON.stringify(products)}};
-  window.__sync=function(){var c=document.querySelector('.js-carticon-counter');if(c){c.textContent=window.tcart.products.length?String(window.tcart.products.length):'';}};window.__sync();
+  window.__recalc=function(){var n=0;window.tcart.products.forEach(function(p){if(p){n+=(parseFloat(p.price)||0)*(p.quantity||1);}});
+    window.tcart.prodamount=n;var a=n;if(window.tcart.delivery&&window.tcart.delivery.price>0){a+=+window.tcart.delivery.price;}window.tcart.amount=a;};
+  window.tcart__updateTotalProductsinCartObj=function(){window.__recalc();};
+  window.tcart__reDrawTotal=function(){var e=document.querySelector('.t706__cartwin-prodamount');if(e){e.textContent=String(window.tcart.prodamount);}
+    var t=document.querySelector('.t706__cartwin-totalamount');if(t){t.textContent=String(window.tcart.amount);}};
+  window.__sync=function(){window.__recalc();var c=document.querySelector('.js-carticon-counter');if(c){c.textContent=window.tcart.products.length?String(window.tcart.products.length):'';}};window.__sync();
   window.tcart__addProduct=function(p){window.tcart.products.push(p);window.__sync();return true;};
   window.tcart__deleteProduct=function(i){window.tcart.products.splice(i,1);window.__sync();};
   window.tcart__saveLocalObj=function(){};<\/script>${SRC}</body></html>`,
@@ -21,12 +26,20 @@ let pass=0, fail=0;
 const ok=(c,m)=>{ c?(pass++,console.log('  ✓ '+m)):(fail++,console.log('  ✗ '+m)); };
 
 (async () => {
-  console.log('\n16) Все 46 позиций из выгрузки (товары + модификации) опознаются как ЗАВТРАКИ');
+  console.log('\n16) Позиции из выгрузки: завтраки блокируются, сырники и запеканка — нет');
   const main = { name:'Борщ с говядиной', url:'https://roomservice-bereza.ru/tproduct/111111111111-borsch', uid:'1' };
   let d = make(msk(2026,8,28,9,0), [main]); await wait(400);
-  let bad = [];
-  ALL.forEach(p => { if (d.window.tcart__addProduct(p) !== false) { bad.push(p.name); d.window.tcart.products.pop(); } });
-  ok(bad.length === 0, bad.length ? ('НЕ опознаны: ' + bad.join(' | ')) : 'все 46 позиций заблокированы к добавлению в заказ основного меню');
+  const ANY = /запеканк|сырник/i;                     // подаются и утром, и днём
+  let bad = [], anyOk = [];
+  ALL.forEach(p => {
+    const blocked = d.window.tcart__addProduct(p) === false;
+    if (!blocked) d.window.tcart.products.pop();
+    if (ANY.test(p.name)) { if (!blocked) anyOk.push(p.name); }
+    else if (!blocked) bad.push(p.name);
+  });
+  ok(bad.length === 0, bad.length ? ('НЕ опознаны как завтрак: ' + bad.join(' | '))
+     : `все ${ALL.length - anyOk.length} завтраков заблокированы к добавлению в заказ основного меню`);
+  ok(anyOk.length === 8, `сырники и запеканка (${anyOk.length} позиции) свободно добавляются к основному меню`);
 
   console.log('\n17) Блюда основного меню НЕ считаются завтраками');
   d = make(msk(2026,8,28,9,0), [main]); await wait(400);

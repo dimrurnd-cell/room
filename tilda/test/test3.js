@@ -13,7 +13,22 @@ function make(nowTs, products, opts) {
   <script>
     ${opts.stale ? `try{localStorage.setItem('tcart',JSON.stringify({products:${JSON.stringify(opts.stale)}}));}catch(e){}` : ''}
     window.tcart = { products: ${JSON.stringify(products)} };
-    window.__sync = function () { var c = document.querySelector('.js-carticon-counter');
+    window.__recalc = function () {
+      var n = 0;
+      window.tcart.products.forEach(function (p) { if (p) { n += (parseFloat(p.price) || 0) * (p.quantity || 1); } });
+      window.tcart.prodamount = n;
+      var a = n;
+      if (window.tcart.delivery && window.tcart.delivery.price > 0) { a += +window.tcart.delivery.price; }
+      window.tcart.amount = a;
+    };
+    window.tcart__updateTotalProductsinCartObj = function () { window.__recalc(); };
+    window.tcart__reDrawTotal = function () {
+      var e = document.querySelector('.t706__cartwin-prodamount');
+      if (e) { e.textContent = String(window.tcart.prodamount); }
+      var t = document.querySelector('.t706__cartwin-totalamount');
+      if (t) { t.textContent = String(window.tcart.amount); }
+    };
+    window.__sync = function () { window.__recalc(); var c = document.querySelector('.js-carticon-counter');
       if (c) { c.textContent = ${opts.counter !== undefined ? JSON.stringify(String(opts.counter)) : 'window.tcart.products.length ? String(window.tcart.products.length) : ""'}; } };
     window.__sync();
     window.tcart__addProduct = function (p) { window.tcart.products.push(p); window.__sync(); return true; };
