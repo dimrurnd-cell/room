@@ -1,0 +1,110 @@
+<!-- ============================================================================
+     РУМ-СЕРВИС «БЕРЁЗА» — ускорение загрузки. Часть 1: ранние подключения.
+     ----------------------------------------------------------------------------
+     Куда вставлять: Настройки сайта → Ещё → HTML-код для вставки внутрь HEAD.
+     Заменяет прежнюю версию этого файла целиком.
+
+     Что изменилось после проверки в PageSpeed Insights:
+       • preconnect осталось три вместо семи. Google предупреждает, что больше
+         четырёх заранее открытых соединений вредят: браузер тратит на них
+         ресурсы, отнимая их у того, что нужно прямо сейчас. Оставлены только
+         те, без которых не построится первый экран; остальным хватает
+         dns-prefetch — он дешевле и лишь заранее находит адрес сервера.
+       • добавлено раннее сообщение браузеру о картинке первого экрана,
+         чтобы он занялся ею в первую очередь (PageSpeed просит fetchpriority).
+     ========================================================================= -->
+
+<meta http-equiv="x-dns-prefetch-control" content="on">
+
+<!-- Три соединения, от которых зависит первый экран.
+     store.tildaapi.com — список блюд, без него каталог пустой.
+     static.tildacdn.com — скрипты, стили и фотографии.
+     fonts.gstatic.com — файлы шрифта Jost. -->
+<link rel="preconnect" href="https://store.tildaapi.com" crossorigin>
+<link rel="preconnect" href="https://static.tildacdn.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Остальным достаточно заранее узнать адрес -->
+<link rel="dns-prefetch" href="https://optim.tildacdn.com">
+<link rel="dns-prefetch" href="https://ws.tildacdn.com">
+<link rel="dns-prefetch" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://mc.yandex.ru">
+
+<!-- ---------------------------------------------------------------------------
+     Картинка первого экрана. PageSpeed показывает её как самый крупный элемент
+     страницы: пока она не появилась, гость считает, что сайт ещё грузится.
+     Строка ниже просит браузер заняться ею раньше остального.
+
+     ВАЖНО: адрес привязан к конкретному файлу. Если поменяете фон первого
+     экрана — обновите ссылку. Где взять новую: откройте сайт, правая кнопка →
+     «Исходный код страницы», найдите «01-foto-zavtrak» и скопируйте адрес.
+     Если файл сменился, а строку не обновить, браузер просто скачает лишние
+     90 КБ — поэтому при сомнениях эти две строки можно удалить.
+     ------------------------------------------------------------------------ -->
+<link rel="preload" as="image" fetchpriority="high"
+      href="https://static.tildacdn.com/tild3830-3431-4437-b730-656436333437/01-foto-zavtrak-na-p.webp">
+
+<!-- ---------------------------------------------------------------------------
+     Шрифт Jost подключается с fonts.googleapis.com без параметра display=swap.
+     Из-за этого браузер прячет ВЕСЬ текст, пока шрифт не скачается, — до трёх
+     секунд пустой страницы, если Google отвечает медленно (обычная история
+     в России без VPN). Строки ниже дописывают display=swap: текст показывается
+     сразу системным шрифтом и подменяется на Jost, когда тот придёт.
+
+     Это лечение симптома. Правильное решение — перенести Jost на свой домен:
+     Настройки сайта → Шрифты → загрузить файлы шрифта. Тогда минус два
+     внешних домена в критическом пути и код ниже можно удалить.
+     ------------------------------------------------------------------------ -->
+<script>
+(function () {
+  'use strict';
+  function fix(link) {
+    try {
+      var h = link.getAttribute('href') || '';
+      if (h.indexOf('fonts.googleapis.com') === -1 || h.indexOf('display=') !== -1) { return; }
+      link.setAttribute('href', h + (h.indexOf('?') === -1 ? '?' : '&') + 'display=swap');
+    } catch (e) {}
+  }
+  function scan() {
+    var l = document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]'), i;
+    for (i = 0; i < l.length; i++) { fix(l[i]); }
+  }
+  scan();
+  /* тег со шрифтом может стоять ниже нашего кода — ловим его появление */
+  try {
+    var mo = new MutationObserver(scan);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () { mo.disconnect(); }, 4000);
+  } catch (e) {}
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', scan); }
+})();
+</script>
+
+<!-- ---------------------------------------------------------------------------
+     Картинкам первого экрана проставляем высокий приоритет и снимаем
+     отложенную загрузку: браузер должен показать их раньше всего остального.
+     Всё, что ниже первого экрана, наоборот отправляем в отложенную загрузку.
+     ------------------------------------------------------------------------ -->
+<script>
+(function () {
+  'use strict';
+  var done = false;
+  function boost() {
+    if (done) { return; }
+    var imgs = document.querySelectorAll('img'), i, img, r, n = 0;
+    for (i = 0; i < imgs.length && n < 3; i++) {
+      img = imgs[i];
+      try { r = img.getBoundingClientRect(); } catch (e) { continue; }
+      if (r.width < 40 || r.top > (window.innerHeight || 800)) { continue; }
+      if (img.getAttribute('loading') === 'lazy') { img.removeAttribute('loading'); }
+      if (!img.getAttribute('fetchpriority')) { img.setAttribute('fetchpriority', 'high'); }
+      n += 1;
+    }
+    if (n) { done = true; }
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boost); }
+  else { boost(); }
+  setTimeout(boost, 600);
+  setTimeout(boost, 1800);
+})();
+</script>

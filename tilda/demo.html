@@ -1,0 +1,1579 @@
+<title>Корзина рум-сервиса «Берёза»</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Lora:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F2F5F1; --surface:#FFFFFF; --sunk:#E8EDE7;
+  --ink:#101311; --muted:#5F6B62; --line:#DDE4DC;
+  --accent:#268C3E; --accent-soft:rgba(38,140,62,.10);
+  --warn:#8A5A00; --warn-soft:rgba(214,138,0,.12);
+  --bad:#B3302F; --bad-soft:rgba(179,48,47,.09);
+  --shadow:0 1px 2px rgba(16,19,17,.05), 0 12px 32px rgba(16,19,17,.06);
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1110; --surface:#171B18; --sunk:#1F2521;
+    --ink:#E9EEE8; --muted:#96A399; --line:#2A312C;
+    --accent:#5CBB72; --accent-soft:rgba(92,187,114,.13);
+    --warn:#D9A445; --warn-soft:rgba(217,164,69,.13);
+    --bad:#E27B76; --bad-soft:rgba(226,123,118,.12);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.34);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1110; --surface:#171B18; --sunk:#1F2521;
+  --ink:#E9EEE8; --muted:#96A399; --line:#2A312C;
+  --accent:#5CBB72; --accent-soft:rgba(92,187,114,.13);
+  --warn:#D9A445; --warn-soft:rgba(217,164,69,.13);
+  --bad:#E27B76; --bad-soft:rgba(226,123,118,.12);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.34);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:'Jost',system-ui,Arial,sans-serif;font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 22px 72px}
+h1,h2,h3{font-family:'Lora',Georgia,serif;font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,4.2vw,40px);line-height:1.12;letter-spacing:-.01em}
+h2{font-size:20px;line-height:1.25}
+h3{font-size:16px;font-family:'Jost',sans-serif;font-weight:500}
+p{margin:0}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+header.head{display:flex;flex-direction:column;gap:12px;padding-bottom:28px;margin-bottom:28px;border-bottom:1px solid var(--line)}
+.head p.lede{max-width:62ch;color:var(--muted);font-size:17px;font-weight:300}
+.head .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.tag{font-size:12.5px;padding:5px 11px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag_ok{background:var(--accent-soft);color:var(--accent)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:22px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.card__h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.card__h .hint{font-size:12.5px;color:var(--muted)}
+
+/* --- часы --- */
+.clockface{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.clockface .t{font-family:'IBM Plex Mono',monospace;font-size:44px;font-weight:500;letter-spacing:-.02em;line-height:1}
+.clockface .d{font-size:13px;color:var(--muted)}
+.slider{width:100%;margin:16px 0 6px;accent-color:var(--accent);height:22px}
+.scale{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.chip{font:inherit;font-size:13.5px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);
+  background:transparent;color:var(--ink);cursor:pointer;transition:border-color .15s,background-color .15s,color .15s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.chip .mono{font-size:13px}
+.chip small{display:block;font-size:11px;opacity:.6;margin-top:2px}
+.speed{display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+.switch{position:relative;width:44px;height:25px;flex:0 0 auto}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;width:100%;height:100%}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--sunk);border:1px solid var(--line);transition:background-color .18s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;
+  background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .18s}
+.switch input:checked + span{background:var(--accent);border-color:var(--accent)}
+.switch input:checked + span::after{transform:translateX(19px)}
+.switch input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+
+/* --- меню --- */
+.menu{display:flex;flex-direction:column;gap:6px}
+.menu + .eyebrow{margin-top:18px}
+.eyebrow.sec{margin-bottom:9px;display:block}
+.dish{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;font-size:14.5px;
+  padding:9px 11px;border-radius:10px;border:1px solid transparent;background:var(--sunk);color:var(--ink);cursor:pointer;
+  transition:border-color .15s,transform .1s}
+.dish:hover{border-color:var(--accent)}
+.dish:active{transform:scale(.99)}
+.dish .n{flex:1 1 auto;min-width:0}
+.dish .p{flex:0 0 auto;color:var(--muted);font-size:13px}
+.dish .plus{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:var(--surface);color:var(--muted);
+  display:grid;place-items:center;font-size:15px;line-height:1}
+
+/* --- предпросмотр сайта --- */
+.preview{border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#fff}
+.preview__bar{display:flex;align-items:center;gap:9px;padding:10px 14px;background:#111;color:#fff;font-size:12.5px;letter-spacing:.01em}
+.preview__bar i{width:8px;height:8px;border-radius:50%;background:#3d3d3d;display:block}
+.preview__bar span{opacity:.7;margin-left:6px;font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+.preview__body{padding:22px 20px 24px;background:#fff;color:#000;font-family:'Jost',Arial,sans-serif}
+.pv-title{font-size:22px;font-weight:500;color:#000;margin-bottom:14px;font-family:'Jost',sans-serif}
+.pv-rows{display:flex;flex-direction:column;border-top:1px solid #eee}
+.pv-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #eee;font-size:14.5px;color:#000}
+.pv-row .nm{flex:1 1 auto;min-width:0;font-weight:400;line-height:1.3}
+.pv-row .kind{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-top:3px;color:#9a9a9a}
+.pv-row .pr{flex:0 0 auto;font-variant-numeric:tabular-nums;color:#000}
+.pv-row .rm{flex:0 0 auto;border:0;background:none;color:#bbb;cursor:pointer;font-size:18px;line-height:1;padding:2px 4px}
+.pv-row .rm:hover{color:#b3302f}
+.pv-empty{padding:26px 0;color:#9a9a9a;font-size:14.5px}
+.pv-total{display:flex;justify-content:space-between;padding:10px 0 2px;font-size:15px;color:#000}
+.pv-total_srv{color:#666;font-size:14px}
+.pv-total_grand{border-top:1px solid #eee;margin-top:8px;padding-top:12px;font-size:17px;font-weight:500}
+.pv-total b{font-weight:500;font-variant-numeric:tabular-nums}
+.pv-sub{margin-top:16px;font-size:13px;color:#777;line-height:1.5}
+.t-submit{margin-top:18px;width:100%;font:inherit;font-family:'Jost',sans-serif;font-size:15px;letter-spacing:.02em;
+  padding:16px 20px;border-radius:30px;border:0;background:#000;color:#fff;cursor:pointer;transition:opacity .18s}
+.t-submit:hover{opacity:.85}
+.pv-note{margin-top:10px;font-size:12px;color:#9a9a9a;text-align:center}
+.pv-done{margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(38,140,62,.09);color:#1d6e30;font-size:14px;display:none}
+.pv-done.on{display:block}
+
+/* --- то, что уходит в CRM --- */
+.crm{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:14px;align-items:baseline}
+.crm dt{color:var(--muted);font-size:13px}
+.crm dd{margin:0;font-family:'IBM Plex Mono',monospace;font-size:13.5px}
+.crm dd.empty{color:var(--muted);font-family:'Jost',sans-serif;font-size:13.5px}
+
+/* --- правила --- */
+.rules{width:100%;border-collapse:collapse;font-size:14.5px}
+.rules th,.rules td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.rules th{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.rules td:first-child{white-space:nowrap;font-weight:500}
+.rules .mono{font-size:13.5px}
+.tblwrap{overflow-x:auto}
+.steps{display:flex;flex-direction:column;gap:10px;margin:0;padding-left:20px}
+.steps li{padding-left:4px}
+.steps code{font-family:'IBM Plex Mono',monospace;font-size:13px;background:var(--sunk);padding:2px 6px;border-radius:5px}
+.foot{margin-top:34px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px;max-width:70ch}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <span class="eyebrow">roomservice-bereza.ru · отель «Камертон»</span>
+    <h1>Корзина рум-сервиса «Берёза»</h1>
+    <p class="lede">Рабочий предпросмотр доработки корзины: временные слоты подачи в номер с учётом времени
+      на приготовление и запрет объединять завтраки с основным меню. Ниже — тот же код, который вставляется
+      в футер сайта: покрутите часы и соберите заказ, чтобы увидеть, как это ведёт себя у гостя.</p>
+    <div class="meta">
+      <span class="tag tag_ok">53 автотеста пройдено</span>
+      <span class="tag">Время Ростова-на-Дону</span>
+      <span class="tag">Шрифт Jost</span>
+      <span class="tag">Обслуживание 10%</span>
+      <span class="tag">Без правок в блоках Tilda</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="col">
+      <section class="card">
+        <div class="card__h"><h2>Часы</h2><span class="hint">московское время</span></div>
+        <div class="clockface">
+          <span class="t mono" id="clock">07:31</span>
+          <span class="d" id="clockday">пятница, 28 августа</span>
+        </div>
+        <input class="slider" id="tslider" type="range" min="0" max="1439" step="1" value="451" aria-label="Время суток">
+        <div class="scale mono"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span></div>
+        <div class="chips" id="presets"></div>
+        <label class="speed">
+          <span class="switch"><input type="checkbox" id="fast"><span></span></span>
+          Ускорить время в 60 раз — видно, как слоты закрываются сами
+        </label>
+      </section>
+
+      <section class="card">
+        <div class="card__h"><h2>Меню</h2><span class="hint">нажмите, чтобы добавить</span></div>
+        <span class="eyebrow sec">Завтраки — подача 8:00–10:00</span>
+        <div class="menu" id="menu-b"></div>
+        <span class="eyebrow sec" style="margin-top:18px">Основное меню — подача 13:00–22:00</span>
+        <div class="menu" id="menu-m"></div>
+        <span class="eyebrow sec" style="margin-top:18px">Кофе, чай, напитки — к любому заказу</span>
+        <div class="menu" id="menu-d"></div>
+        <span class="eyebrow sec" style="margin-top:18px">Подаются и утром, и днём</span>
+        <div class="menu" id="menu-a"></div>
+        <p class="hint" style="margin-top:12px;color:var(--muted);font-size:12.5px">
+          Завтраки — реальные позиции из выгрузки магазина. Блюда основного меню и напитки взяты для примера:
+          система относит к завтракам только то, что перечислено в настройках, напитки узнаёт по названию,
+          всё остальное — основное меню.</p>
+      </section>
+
+      <section class="card">
+        <div class="card__h"><h2>Что уйдёт в заказ</h2><span class="hint">штатные поля Tilda</span></div>
+        <dl class="crm">
+          <dt>data_dostavki</dt><dd id="f-date" class="empty">не выбрано</dd>
+          <dt>vremya_dostavki</dt><dd id="f-time" class="empty">не выбрано</dd>
+        </dl>
+        <p class="hint" style="margin-top:14px;font-size:12.5px;color:var(--muted)">
+          Формат полей не меняется — почта, CRM и выгрузки заказов продолжают работать как раньше.
+          Родные поля даты и времени скрыты от гостя, чтобы нельзя было вписать произвольное время.</p>
+      </section>
+    </div>
+
+    <div class="col">
+      <div class="preview">
+        <div class="preview__bar"><i></i><i></i><i></i><span>roomservice-bereza.ru — корзина</span></div>
+        <div class="preview__body">
+          <div class="t706">
+            <div class="t706__cartwin">
+              <div class="t706__cartwin-content">
+                <div class="pv-title">Ваш заказ</div>
+                <div class="t706__cartwin-products"><div class="pv-rows" id="rows"></div></div>
+                <div class="t706__cartwin-bottom">
+                  <div class="pv-total"><span>Сумма заказа</span><b id="total">0 р.</b></div>
+                  <div class="pv-total pv-total_srv" id="srv-row" style="display:none">
+                    <span id="srv-name">Обслуживание 10%</span><b id="srv-val">0 р.</b></div>
+                  <div class="pv-total pv-total_grand" id="grand-row" style="display:none">
+                    <span>Итоговая сумма</span><b id="grand">0 р.</b></div>
+                </div>
+                <div class="t706__orderform">
+                  <form id="demoform">
+                    <div class="t-input-group t-input-group_da" data-field-name="data_dostavki">
+                      <div class="t-input-block"><div class="t-datepicker__wrapper">
+                        <input type="text" name="data_dostavki" class="t-input t-datepicker js-tilda-rule" value=""
+                          data-tilda-req="1" data-tilda-rule="date" data-tilda-dateformat="DD-MM-YYYY"
+                          data-tilda-datediv="dash" data-tilda-dateunvailable="past" data-tilda-mask="99-99-9999">
+                      </div></div>
+                    </div>
+                    <div class="t-input-group t-input-group_tm" data-field-name="vremya_dostavki">
+                      <div class="t-input-block">
+                        <input type="text" name="vremya_dostavki" class="t-input t-inputtime js-tilda-rule" value=""
+                          data-tilda-req="1" data-tilda-rule="time" data-tilda-mask="99:99">
+                      </div>
+                    </div>
+                    <button class="t-submit" type="submit">ЗАКАЗАТЬ</button>
+                  </form>
+                  <p class="pv-note">Предпросмотр всегда светлый — таким блок выглядит на сайте</p>
+                  <div class="pv-done" id="done"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="card" style="margin-top:22px">
+    <div class="card__h"><h2>Правила, зашитые в код</h2><span class="hint">меняются в блоке CFG</span></div>
+    <p class="hint" style="margin:-4px 0 14px;color:var(--muted);font-size:13px">
+      Запас времени на кухню гостю нигде не показывается — он только закрывает ближайшие слоты.</p>
+    <div class="tblwrap">
+      <table class="rules">
+        <thead><tr><th>Категория</th><th>Слоты подачи</th><th>Запас на кухню</th><th>Как это видит гость</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Завтраки</td>
+            <td class="mono">8:00 · 8:30 · 9:00 · 9:30 · 10:00</td>
+            <td class="mono">30 мин</td>
+            <td>В 7:31 слот 8:00 уже закрыт — доступны 8:30 и далее. После 9:30 завтраки переносятся на завтра.</td>
+          </tr>
+          <tr>
+            <td>Основное меню</td>
+            <td class="mono">13:00 … 22:00, через полчаса</td>
+            <td class="mono">60 мин</td>
+            <td>В 12:31 слоты 13:00 и 13:30 закрыты — доступен 14:00 и далее. После 21:00 заказ переносится на завтра.</td>
+          </tr>
+          <tr>
+            <td>Кофе, чай, напитки,<br>сырники, запеканка</td>
+            <td class="mono">по времени остального заказа</td>
+            <td class="mono">30 мин</td>
+            <td>Добавляются к любому заказу в любом количестве. Если в заказе только они —
+              доступны оба окна подачи: 8:00–10:00 и 13:00–22:00.</td>
+          </tr>
+          <tr>
+            <td>Обслуживание</td>
+            <td class="mono">10% от суммы</td>
+            <td class="mono">—</td>
+            <td>Отдельной строкой после суммы заказа. Входит в итог, в письмо заказа
+              и в сумму к оплате.</td>
+          </tr>
+          <tr>
+            <td>Смешанный заказ</td>
+            <td colspan="2">запрещён</td>
+            <td>Ошибка появляется в момент добавления блюда, товар в корзину не попадает. Если корзина уже
+              смешана — оформление заблокировано, в корзине две кнопки, чтобы разделить заказ в один клик.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:18px">
+    <div class="card__h"><h2>Установка</h2><span class="hint">3 минуты</span></div>
+    <ol class="steps">
+      <li>Настройки сайта → <b>Ещё</b> → <b>HTML-код для вставки внутрь BODY</b> (перед <code>&lt;/body&gt;</code>).</li>
+      <li>Вставить содержимое файла <code>footer-roomservice-cart.html</code> целиком.</li>
+      <li>Сохранить и <b>опубликовать все страницы</b> — код должен попасть на страницы с корзиной.</li>
+    </ol>
+    <p class="hint" style="margin-top:14px;font-size:13px;color:var(--muted)">
+      В режиме редактора и превью Tilda скрипт сам себя отключает и не мешает работе в конструкторе.
+      Новый завтрак в меню — одна строка в списке <code>CFG.breakfast</code>; другое время работы кухни —
+      значения <code>slots</code> и <code>lead</code>.</p>
+  </section>
+
+  <p class="foot">Демонстрация работает на том же коде, что уйдёт на сайт: часы страницы подменены, корзина —
+    учебная, вся логика слотов, ошибок и заполнения полей настоящая.</p>
+</div>
+
+<script>
+/* ---- часы демонстрации: подменяем Date.now, чтобы «путешествовать во времени» ---- */
+(function () {
+  var REAL = Date.now.bind(Date), base = null, anchor = 0;
+  window.__speed = 1;
+  Date.now = function () { return base === null ? REAL() : base + (REAL() - anchor) * window.__speed; };
+  window.__setClock = function (ts) { base = ts; anchor = REAL(); };
+  window.__realClock = function () { base = null; };
+  /* время «сервера» в демо совпадает с подставленными часами */
+  var _f = window.fetch ? window.fetch.bind(window) : null;
+  window.fetch = function (u) {
+    if (typeof u === 'string' && u.indexOf('rsb=') !== -1) {
+      return Promise.resolve({ headers: { get: function (k) { return k === 'Date' ? new Date(Date.now()).toUTCString() : null; } } });
+    }
+    return _f ? _f.apply(null, arguments) : Promise.reject(new Error('no fetch'));
+  };
+})();
+
+/* ---- учебная корзина вместо корзины Tilda ---- */
+window.tcart = { products: [] };
+window.tcart__updateTotalProductsinCartObj = function () {
+  var n = 0;
+  window.tcart.products.forEach(function (p) { if (p) { n += (parseFloat(p.price) || 0) * (p.quantity || 1); } });
+  window.tcart.prodamount = n;
+  var a = n;
+  if (window.tcart.delivery && window.tcart.delivery.price > 0) { a += +window.tcart.delivery.price; }
+  window.tcart.amount = a;
+};
+window.tcart__reDrawTotal = function () { if (window.__drawTotals) { window.__drawTotals(); } };
+window.tcart__addProduct = function (p) {
+  window.tcart.products.push(p); window.tcart__updateTotalProductsinCartObj(); return true;
+};
+window.tcart__deleteProduct = function (i) {
+  window.tcart.products.splice(i, 1); window.tcart__updateTotalProductsinCartObj();
+};
+window.tcart__saveLocalObj = function () {};
+window.tcart__reDrawProducts = function () {};
+window.tcart__reDrawCartIcon = function () {};
+</script>
+
+<!-- ============================================================================
+     РУМ-СЕРВИС «БЕРЁЗА» / отель «КАМЕРТОН» — модификация корзины Tilda (t706)
+     ----------------------------------------------------------------------------
+     Что делает:
+       1. Завтраки  — слоты 08:00 … 10:00 через полчаса, кухне 30 мин.
+       2. Остальное — слоты 13:00 … 22:00 через полчаса, кухне 60 мин.
+          Слот доступен, если ДО него осталось не меньше времени на готовку.
+          (в 7:31 слот 8:00 уже закрыт, доступны 8:30 и далее)
+          Время на приготовление гостю нигде не показывается.
+       2а. Кофе, чай, напитки, а также сырники и творожная запеканка —
+          подаются в оба окна. Их можно добавить и к завтраку, и к основному
+          меню; заказ из одних таких позиций принимается и утром, и днём.
+       3. Обслуживание 10% добавляется к сумме заказа автоматически:
+          отдельной строкой в корзине, в письме заказа и в сумме к оплате.
+       3. Пересчёт доступности — в реальном времени, каждую секунду.
+       4. Завтраки нельзя смешивать с другими категориями: ошибка показывается
+          в момент добавления товара, оформление заказа блокируется.
+       5. Время — московское, синхронизируется с временем сервера
+          (часы гостя могут быть сбиты — это не сломает логику).
+       6. Выбранные дата и время записываются в штатные поля Tilda
+          data_dostavki (ДД-ММ-ГГГГ) и vremya_dostavki (ЧЧ:ММ) —
+          заказ уходит в CRM/почту в прежнем формате.
+
+     Куда вставлять:
+       Настройки сайта → Ещё → HTML-код для вставки внутрь BODY (перед </body>)
+       ИЛИ блок T123 «HTML» в футере. Публикация всех страниц.
+
+     Настройка (блок CFG ниже):
+       CFG.menus.*.slots / .lead  — слоты и время на приготовление (в минутах)
+       CFG.breakfast.*            — как система узнаёт завтраки (id / slug / названия)
+       CFG.daysForward            — на сколько дней вперёд можно заказать (1 = сегодня и завтра)
+     ========================================================================= -->
+
+<style>
+.rsb-slots,.rsb-slots *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+.rsb-slots{display:none;margin:24px 0 4px;padding:20px;border:1px solid #e6e6e6;border-radius:16px;
+  background:#fff;font-family:'Jost',Arial,Helvetica,sans-serif;color:#000;
+  animation:rsb-in .28s cubic-bezier(.16,1,.3,1) both}
+.rsb-slots.rsb-on{display:block}
+@keyframes rsb-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rsb-slots__head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:2px}
+.rsb-slots__title{font-size:18px;font-weight:500;letter-spacing:.01em;line-height:1.25}
+.rsb-clock{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:400;color:#7a7a7a;white-space:nowrap}
+.rsb-clock b{font-weight:500;color:#000;font-variant-numeric:tabular-nums}
+.rsb-clock i{width:6px;height:6px;border-radius:50%;background:#268c3e;display:inline-block;animation:rsb-pulse 2s infinite}
+@keyframes rsb-pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.rsb-note{margin:8px 0 16px;font-size:14px;line-height:1.45;color:#6b6b6b;font-weight:300}
+.rsb-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#9a9a9a;margin:0 0 9px;font-weight:400}
+.rsb-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.rsb-chip{position:relative;font:inherit;font-size:15px;font-weight:400;line-height:1;color:#000;background:#fff;
+  border:1px solid #dcdcdc;border-radius:30px;padding:12px 18px;cursor:pointer;
+  transition:background-color .18s ease,color .18s ease,border-color .18s ease,transform .12s ease,opacity .18s ease;
+  font-variant-numeric:tabular-nums}
+.rsb-chip:hover:not(:disabled){border-color:#000;transform:translateY(-1px)}
+.rsb-chip:active:not(:disabled){transform:translateY(0) scale(.97)}
+.rsb-chip:focus-visible{outline:2px solid #268c3e;outline-offset:2px}
+.rsb-chip.rsb-sel{background:#000;border-color:#000;color:#fff}
+.rsb-chip:disabled{cursor:not-allowed;color:#c2c2c2;border-color:#efefef;background:#fafafa;text-decoration:line-through;text-decoration-thickness:1px}
+.rsb-chip__sub{display:block;font-size:11px;line-height:1;margin-top:5px;opacity:.55;text-decoration:none}
+.rsb-chip.rsb-hint:not(:disabled):not(.rsb-sel){animation:rsb-hint 2.4s ease-in-out 2}
+@keyframes rsb-hint{0%,100%{box-shadow:0 0 0 0 rgba(38,140,62,0)}50%{box-shadow:0 0 0 5px rgba(38,140,62,.14)}}
+.rsb-times_grouped{flex-direction:column;gap:14px;align-items:stretch}
+.rsb-group{display:flex;flex-direction:column;gap:8px}
+.rsb-glabel{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#9a9a9a;font-weight:400}
+.rsb-row_in{margin-bottom:0}
+.rsb-status{display:flex;align-items:flex-start;gap:9px;font-size:14px;line-height:1.4;font-weight:400;
+  border-radius:12px;padding:12px 14px;background:#f5f5f5;color:#4a4a4a;transition:background-color .2s,color .2s}
+.rsb-status svg{flex:0 0 auto;margin-top:1px}
+.rsb-status.rsb-ok{background:rgba(38,140,62,.08);color:#1d6e30}
+.rsb-status.rsb-warn{background:rgba(214,138,0,.1);color:#8a5a00}
+.rsb-status.rsb-bad{background:rgba(209,59,59,.08);color:#b3302f}
+.rsb-status b{font-weight:500}
+.rsb-err{display:none;border:1px solid rgba(209,59,59,.35);background:rgba(209,59,59,.06);border-radius:14px;padding:16px 18px}
+.rsb-err.rsb-on{display:block}
+.rsb-err__t{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:500;color:#b3302f;margin-bottom:6px}
+.rsb-err__d{font-size:14px;line-height:1.45;font-weight:300;color:#6b3030}
+.rsb-err__a{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.rsb-btn{font:inherit;font-size:14px;font-weight:400;line-height:1;padding:11px 18px;border-radius:30px;cursor:pointer;
+  border:1px solid #000;background:#000;color:#fff;transition:opacity .18s ease,transform .12s ease}
+.rsb-btn.rsb-btn_gh{background:transparent;color:#000}
+.rsb-btn:hover{opacity:.82}.rsb-btn:active{transform:scale(.97)}
+.rsb-shake{animation:rsb-shake .42s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes rsb-shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+.rsb-hidden-native{display:none!important}
+.rsb-toasts{position:fixed;z-index:2147483000;left:50%;top:18px;transform:translateX(-50%);width:calc(100% - 32px);max-width:460px;
+  display:flex;flex-direction:column;gap:10px;pointer-events:none;font-family:'Jost',Arial,Helvetica,sans-serif}
+.rsb-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:11px;background:#151515;color:#fff;border-radius:14px;
+  padding:14px 16px;box-shadow:0 12px 34px rgba(0,0,0,.28);animation:rsb-toast-in .34s cubic-bezier(.16,1,.3,1) both}
+.rsb-toast.rsb-out{animation:rsb-toast-out .24s ease forwards}
+@keyframes rsb-toast-in{from{opacity:0;transform:translateY(-14px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes rsb-toast-out{to{opacity:0;transform:translateY(-10px) scale(.98)}}
+.rsb-toast__i{flex:0 0 auto;margin-top:1px}
+.rsb-toast__c{flex:1 1 auto;min-width:0}
+.rsb-toast__t{font-size:15px;font-weight:500;line-height:1.3}
+.rsb-toast__d{font-size:13px;font-weight:300;line-height:1.4;opacity:.82;margin-top:3px}
+.rsb-toast__b{font:inherit;font-size:13px;font-weight:400;line-height:1;margin-top:10px;padding:9px 14px;
+  border-radius:30px;border:1px solid rgba(255,255,255,.55);background:transparent;color:#fff;cursor:pointer;
+  transition:background-color .16s ease,border-color .16s ease}
+.rsb-toast__b:hover{background:#fff;border-color:#fff;color:#151515}
+.rsb-toast__x{flex:0 0 auto;background:none;border:0;color:#fff;opacity:.55;cursor:pointer;padding:2px;line-height:0}
+.rsb-toast__x:hover{opacity:1}
+.rsb-toast_err{background:#b3302f}
+.t-submit.rsb-blocked{opacity:.45}
+@media screen and (max-width:640px){
+  .rsb-slots{padding:16px;border-radius:14px;margin:20px 0 4px}
+  .rsb-slots__title{font-size:16px}
+  .rsb-chip{padding:11px 15px;font-size:14px}
+  .rsb-row{gap:7px;margin-bottom:16px}
+  .rsb-toasts{top:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  .rsb-slots,.rsb-chip,.rsb-toast,.rsb-shake,.rsb-clock i{animation:none!important;transition:none!important}
+}
+</style>
+
+<script>
+(function () {
+  'use strict';
+  if (window.__RSB_CART__) { return; }
+  window.__RSB_CART__ = true;
+
+  /* ======================== НАСТРОЙКИ ======================== */
+  var CFG = {
+    tz: 'Europe/Moscow',
+    city: 'Ростов-на-Дону',    /* подпись у часов в корзине */
+    /* Обслуживание: процент от суммы заказа. Показывается отдельной строкой
+       после суммы, входит в итог, в письмо заказа и в сумму к оплате.
+       percent: 0 — полностью отключить. */
+    service: { percent: 10, name: 'Обслуживание 10%', round: 'round' },
+    daysForward: 1,            /* 1 = «Сегодня» + «Завтра»; 2 = ещё и «Послезавтра» */
+    menus: {
+      breakfast: {
+        key: 'breakfast',
+        name: 'Завтраки',
+        slots: ['08:00', '08:30', '09:00', '09:30', '10:00'],
+        lead: 30,              /* минут на приготовление — гостю не показывается */
+        note: 'Завтраки подаём в номер с 8:00 до 10:00. Свободное время обновляется автоматически.'
+      },
+      main: {
+        key: 'main',
+        name: 'Основное меню',
+        slots: ['13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30',
+                '18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00'],
+        lead: 60,
+        note: 'Блюда подаём в номер с 13:00 до 22:00. Свободное время обновляется автоматически.'
+      },
+      /* Позиции, которые подаются и утром, и днём: напитки, сырники, запеканка.
+         Слоты собираются ниже из двух окон сразу. */
+      anytime: {
+        key: 'anytime',
+        name: 'В любое время',
+        slots: [],
+        lead: 30,
+        note: 'Подаём в номер с 8:00 до 10:00 и с 13:00 до 22:00.'
+      }
+    },
+    /* Как система определяет завтрак. Достаточно совпадения по любому пункту.
+       При добавлении нового завтрака в каталог — допишите его сюда
+       (id из ссылки /tproduct/XXXXXXXXXXXX-... или точное название). */
+    breakfast: {
+      ids: ['142718970583','296082006963','847153183813','523668981613',
+            '893065655203','781713795803','351217116933','378144183863','315374361683'],
+      slugs: ['sitnii-set-russkii-zavtrak','klassicheskii-set-angliiskii-zavtrak',
+              'iziskannii-set-skandinavskii-zavtrak','shakshuka','sendvich-s-vetchinoi-i-sirom',
+              'sendvich-so-slabosolyonim-lososem','ovsyanaya-kasha-s-yablokami-i-myodom-bez',
+              'nezhnaya-tvorozhnaya-zapekanka-s-topping','vozdushnie-domashnie-sirniki-s-toppingom'],
+      titles: ['Сытный сет «Русский завтрак»','Классический сет «Английский завтрак»',
+               'Изысканный сет «Скандинавский завтрак»','Шакшука','Сэндвич с ветчиной и сыром',
+               'Сэндвич со слабосолёным лососем','Овсяная каша с яблоками и мёдом (без сахара)',
+               'Нежная творожная запеканка с топпингом на выбор','Воздушные домашние сырники с топпингом на выбор'],
+      /* страховка на будущее: всё, где в названии или ссылке есть «завтрак/zavtrak» */
+      keywords: ['завтрак', 'zavtrak']
+    },
+    /* Блюда, которые подаются и на завтрак, и днём. Проверяются ПЕРВЫМИ,
+       поэтому «завтраком» они не считаются, хотя лежат в разделе «Завтраки». */
+    anytime: {
+      ids: ['378144183863', '315374361683'],
+      slugs: ['nezhnaya-tvorozhnaya-zapekanka-s-topping', 'vozdushnie-domashnie-sirniki-s-toppingom'],
+      titles: ['Нежная творожная запеканка с топпингом на выбор',
+               'Воздушные домашние сырники с топпингом на выбор']
+    },
+    /* Нейтральные позиции — кофе, чай, напитки. Сочетаются и с завтраками, и с основным меню,
+       в одном заказе их может быть сколько угодно. Проверяются ПОСЛЕ завтраков, поэтому
+       напиток внутри сета («Русский завтрак - Латте») остаётся завтраком.
+       Точные позиции лучше перечислить в ids / slugs / titles, ключевые слова — страховка. */
+    neutral: {
+      ids: [],
+      slugs: [],
+      titles: [],
+      keywords: ['кофе','эспрессо','американо','капучино','латте','раф','флэт уайт','флэт-уайт',
+                 'макиато','мокко','какао','чай','чайник','матча','напиток','напитки',
+                 'вода','морс','сок','лимонад','компот','смузи','коктейль','кола','тоник','квас',
+                 'kofe','espresso','americano','cappuccino','latte','kakao','chai','chay','matcha',
+                 'napitok','napitki','voda','mors','sok','limonad','kompot','smuzi','kokteil','tonik','kvas']
+    },
+    fields: { date: 'data_dostavki', time: 'vremya_dostavki' },
+    hideNativeFields: true,    /* спрятать штатные поля «дата» и «время» (значения заполняем сами) */
+    syncServerTime: true,      /* сверять часы гостя с часами сервера */
+    debug: false
+  };
+  /* ====================== /НАСТРОЙКИ ========================= */
+
+  CFG.menus.anytime.slots = CFG.menus.breakfast.slots.concat(CFG.menus.main.slots);
+
+  var MON = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  var DOW = ['вс','пн','вт','ср','чт','пт','сб'];
+  var DAY_NAMES = ['Сегодня', 'Завтра', 'Послезавтра'];
+
+  function log() { if (CFG.debug && window.console) { console.log.apply(console, ['[rsb]'].concat([].slice.call(arguments))); } }
+
+  /* ---------------------- Время (МСК) ---------------------- */
+  var skew = 0; /* поправка часов гостя к серверному времени, мс */
+  function now() { return Date.now() + skew; }
+
+  var DTF = null;
+  try {
+    DTF = new Intl.DateTimeFormat('en-GB', {
+      timeZone: CFG.tz, hour12: false, year: 'numeric', month: '2-digit',
+      day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    DTF.formatToParts(new Date());
+  } catch (e) { DTF = null; }
+
+  function mskParts(ts) {
+    if (DTF) {
+      var o = {}, arr = DTF.formatToParts(new Date(ts)), i;
+      for (i = 0; i < arr.length; i++) { if (arr[i].type !== 'literal') { o[arr[i].type] = arr[i].value; } }
+      return { y: +o.year, m: +o.month, d: +o.day, h: (+o.hour) % 24, mi: +o.minute, s: +o.second };
+    }
+    var dt = new Date(ts + 180 * 60000); /* фолбэк: МСК = UTC+3 */
+    return { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate(),
+             h: dt.getUTCHours(), mi: dt.getUTCMinutes(), s: dt.getUTCSeconds() };
+  }
+  function mskOffsetMin(ts) {
+    var p = mskParts(ts);
+    return Math.round((Date.UTC(p.y, p.m - 1, p.d, p.h, p.mi, p.s) - Math.floor(ts / 1000) * 1000) / 60000);
+  }
+  /* «стенные» МСК-дата и время -> абсолютная метка времени */
+  function mskEpoch(y, m, d, h, mi) {
+    var base = Date.UTC(y, m - 1, d, h, mi);
+    var off = mskOffsetMin(base - 180 * 60000);
+    return base - off * 60000;
+  }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function hhmm(ts) { var p = mskParts(ts); return pad(p.h) + ':' + pad(p.mi); }
+
+  /* День со сдвигом от «сегодня» по МСК */
+  function dayInfo(offset) {
+    var b = mskParts(now());
+    var dt = new Date(Date.UTC(b.y, b.m - 1, b.d) + offset * 86400000);
+    var y = dt.getUTCFullYear(), m = dt.getUTCMonth() + 1, d = dt.getUTCDate();
+    return {
+      offset: offset, y: y, m: m, d: d,
+      key: y + '-' + pad(m) + '-' + pad(d),
+      value: pad(d) + '-' + pad(m) + '-' + y,                       /* формат поля Tilda */
+      title: DAY_NAMES[offset] || (DOW[dt.getUTCDay()] + ', ' + d + ' ' + MON[m - 1]),
+      sub: d + ' ' + MON[m - 1] + (DAY_NAMES[offset] ? '' : '')
+    };
+  }
+
+  /* Синхронизация с часами сервера: часы гостя часто сбиты */
+  var lastSync = 0;
+  function syncTime() {
+    if (!CFG.syncServerTime || !window.fetch || now() - lastSync < 240000) { return; }
+    lastSync = now();
+    var t0 = Date.now();
+    try {
+      fetch(location.pathname + '?rsb=' + t0, { method: 'HEAD', cache: 'no-store', credentials: 'omit' })
+        .then(function (r) {
+          var h = r && r.headers && r.headers.get('Date');
+          if (!h) { return; }
+          var srv = Date.parse(h);
+          if (!srv) { return; }
+          var rtt = Date.now() - t0;
+          if (rtt > 8000) { return; }
+          var delta = srv + rtt / 2 - Date.now();
+          /* поправку применяем только если расхождение существенное (> 30 c) */
+          skew = Math.abs(delta) > 30000 ? delta : 0;
+          log('server skew', Math.round(skew / 1000), 'c');
+          schedule();
+        })['catch'](function () {});
+    } catch (e) {}
+  }
+
+  /* ------------------- Определение категории ------------------- */
+  function norm(s) {
+    return String(s == null ? '' : s).toLowerCase()
+      .replace(/ё/g, 'е').replace(/[«»"'’`]/g, '').replace(/\s+/g, ' ').trim();
+  }
+  var BT = [];
+  (function () { for (var i = 0; i < CFG.breakfast.titles.length; i++) { BT.push(norm(CFG.breakfast.titles[i])); } })();
+
+  /* Совпадение по списку ids / slugs / titles */
+  function inList(p, list) {
+    if (!p || !list) { return false; }
+    var url = String(p.url || '').toLowerCase(), uid = String(p.uid || ''), name = norm(p.name), i, t;
+    for (i = 0; i < (list.ids || []).length; i++) {
+      if (url.indexOf(list.ids[i]) !== -1 || uid === list.ids[i]) { return true; }
+    }
+    for (i = 0; i < (list.slugs || []).length; i++) {
+      if (url.indexOf(list.slugs[i]) !== -1) { return true; }
+    }
+    for (i = 0; i < (list.titles || []).length; i++) {
+      t = norm(list.titles[i]);
+      if (t && name.indexOf(t) === 0) { return true; }
+    }
+    return false;
+  }
+
+  /* Совпадение по отдельному слову: «кофе» находится, «кофейный чизкейк» — нет */
+  var NRE = null;
+  function neutralRe() {
+    if (NRE) { return NRE; }
+    var w = [], i, k;
+    for (i = 0; i < CFG.neutral.keywords.length; i++) {
+      k = norm(CFG.neutral.keywords[i]).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (k) { w.push(k); }
+    }
+    NRE = w.length ? new RegExp('(^|[^0-9a-zа-я])(' + w.join('|') + ')([^0-9a-zа-я]|$)') : /$^/;
+    return NRE;
+  }
+  function isNeutral(p) {
+    if (!p) { return false; }
+    if (inList(p, CFG.neutral)) { return true; }
+    var re = neutralRe();
+    return re.test(norm(p.name)) || re.test(String(p.url || '').toLowerCase().replace(/[-_/?=&]/g, ' '));
+  }
+  /* 'anytime' | 'breakfast' | 'main'.
+     Порядок важен: сырники и запеканка проверяются раньше завтраков,
+     а напиток внутри сета остаётся частью завтрака. */
+  function kindOf(p) {
+    if (inList(p, CFG.anytime)) { return 'anytime'; }
+    if (isBreakfast(p)) { return 'breakfast'; }
+    if (isNeutral(p)) { return 'anytime'; }
+    return 'main';
+  }
+
+  function isBreakfast(p) {
+    if (!p) { return false; }
+    var url = String(p.url || ''), uid = String(p.uid || ''), name = norm(p.name), i;
+    for (i = 0; i < CFG.breakfast.ids.length; i++) {
+      if (url.indexOf(CFG.breakfast.ids[i]) !== -1 || uid === CFG.breakfast.ids[i]) { return true; }
+    }
+    for (i = 0; i < CFG.breakfast.slugs.length; i++) { if (url.indexOf(CFG.breakfast.slugs[i]) !== -1) { return true; } }
+    for (i = 0; i < BT.length; i++) { if (BT[i] && name.indexOf(BT[i]) === 0) { return true; } }
+    var hay = name + ' ' + url.toLowerCase();
+    for (i = 0; i < CFG.breakfast.keywords.length; i++) {
+      if (hay.indexOf(norm(CFG.breakfast.keywords[i])) !== -1) { return true; }
+    }
+    return false;
+  }
+
+  /* ------------------------- Корзина -------------------------- */
+  /* Позиция считается настоящей, только если у неё есть чем себя опознать и количество > 0.
+     Tilda иногда оставляет в tcart.products «фантомы» — записи с нулевым количеством или
+     без названия. Гость их не видит, а корзина при этом выглядит непустой. */
+  function validProduct(p) {
+    if (!p || typeof p !== 'object') { return false; }
+    var q = (p.quantity === undefined || p.quantity === null || p.quantity === '') ? 1 : parseFloat(p.quantity);
+    if (!(q > 0)) { return false; }
+    return !!(p.name || p.url || p.uid);
+  }
+  /* Сколько позиций показывает сама Tilda: 0 — корзина пуста, -1 — счётчик не найден */
+  function tildaCartCount() {
+    if (!window.tcart) { return -1; }
+    var els = document.querySelectorAll('.t706__carticon-counter, .js-carticon-counter, .t-menuwidgeticons__icon-counter');
+    if (!els.length) { return -1; }
+    var max = -1, i, txt;
+    for (i = 0; i < els.length; i++) {
+      txt = (els[i].textContent || '').replace(/[^0-9]/g, '');
+      max = Math.max(max, txt === '' ? 0 : (parseInt(txt, 10) || 0));
+    }
+    return max;
+  }
+  function cartProducts() {
+    var t = window.tcart, list = null;
+    if (t && Object.prototype.toString.call(t.products) === '[object Array]') {
+      list = t.products;                       /* живой объект Tilda — единственный источник правды */
+    } else if (!t) {
+      try {                                    /* корзина ещё не инициализирована — читаем хранилище */
+        var l = JSON.parse(localStorage.getItem('tcart') || 'null');
+        if (l && Object.prototype.toString.call(l.products) === '[object Array]') { list = l.products; }
+      } catch (e) { list = null; }
+    }
+    if (!list || !list.length) { return []; }
+    var out = [], i;
+    for (i = 0; i < list.length; i++) { if (validProduct(list[i])) { out.push(list[i]); } }
+    return out;
+  }
+  function analyze() {
+    var ps = cartProducts(), b = 0, m = 0, n = 0, i, k;
+    for (i = 0; i < ps.length; i++) {
+      k = kindOf(ps[i]);
+      if (k === 'breakfast') { b += 1; } else if (k === 'anytime') { n += 1; } else { m += 1; }
+    }
+    return {
+      count: ps.length, nb: b, nm: m, nn: n,
+      conflict: b > 0 && m > 0,   /* позиции «в любое время» не конфликтуют ни с чем */
+      menu: b > 0 ? (m > 0 ? null : 'breakfast')
+                  : (m > 0 ? 'main' : (n > 0 ? 'anytime' : null))
+    };
+  }
+  function cartSign() {
+    var ps = cartProducts(), s = '', i;
+    for (i = 0; i < ps.length; i++) { s += (ps[i].uid || ps[i].name || '') + 'x' + (ps[i].quantity || 1) + '|'; }
+    return s;
+  }
+  function deleteAt(i) {
+    try {
+      if (typeof window.tcart__deleteProduct === 'function') { window.tcart__deleteProduct(i); return true; }
+    } catch (e) {}
+    try {
+      if (window.tcart && window.tcart.products) {
+        window.tcart.products.splice(i, 1);
+        if (typeof window.tcart__updateTotalProductsinCartObj === 'function') { window.tcart__updateTotalProductsinCartObj(); }
+        if (typeof window.tcart__saveLocalObj === 'function') { window.tcart__saveLocalObj(); }
+        if (typeof window.tcart__reDrawProducts === 'function') { window.tcart__reDrawProducts(); }
+        if (typeof window.tcart__reDrawCartIcon === 'function') { window.tcart__reDrawCartIcon(); }
+        return true;
+      }
+    } catch (e2) {}
+    var rows = document.querySelectorAll('.t706__cartwin-products .t706__product');
+    if (rows[i]) {
+      var del = rows[i].querySelector('.t706__product-del, .t706__product-delcircle');
+      if (del) { del.click(); return true; }
+    }
+    return false;
+  }
+  /* Полная очистка — выход из любого тупикового состояния корзины */
+  function clearCart(done, guard) {
+    guard = (guard || 0) + 1;
+    var raw = (window.tcart && window.tcart.products) ? window.tcart.products : [];
+    if (!raw.length || guard > 60 || !deleteAt(0)) {
+      schedule();
+      if (done) { done(); }
+      return;
+    }
+    setTimeout(function () { clearCart(done, guard); }, 80);
+  }
+
+  /* Удаляем по одному: Tilda перерисовывает список после каждой операции */
+  function removeWhere(pred) {
+    var ps = cartProducts(), i, idx = -1;
+    for (i = 0; i < ps.length; i++) { if (pred(ps[i])) { idx = i; break; } }
+    if (idx === -1) { schedule(); return; }
+    if (!deleteAt(idx)) { schedule(); return; }
+    setTimeout(function () { removeWhere(pred); }, 90);
+  }
+
+  /* ------------------------ Уведомления ----------------------- */
+  var toastBox = null, lastToast = { key: '', at: 0 };
+  var ICO_ERR = '<svg class="rsb-toast__i" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M10 5.5v5.2M10 14.2v.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>';
+  function toast(title, descr, type, key, action) {
+    var k = key || title;
+    if (k === lastToast.key && Date.now() - lastToast.at < 2500) { return; }
+    lastToast = { key: k, at: Date.now() };
+    if (!toastBox) {
+      toastBox = document.createElement('div');
+      toastBox.className = 'rsb-toasts';
+      toastBox.setAttribute('role', 'region');
+      toastBox.setAttribute('aria-live', 'assertive');
+      document.body.appendChild(toastBox);
+    }
+    var t = document.createElement('div');
+    t.className = 'rsb-toast' + (type === 'err' ? ' rsb-toast_err' : '');
+    t.setAttribute('role', 'alert');
+    t.innerHTML = ICO_ERR +
+      '<div class="rsb-toast__c"><div class="rsb-toast__t"></div>' +
+      (descr ? '<div class="rsb-toast__d"></div>' : '') + '</div>' +
+      '<button type="button" class="rsb-toast__x" aria-label="Закрыть">' +
+      '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>';
+    t.querySelector('.rsb-toast__t').textContent = title;
+    if (descr) { t.querySelector('.rsb-toast__d').textContent = descr; }
+    var close = function () {
+      if (!t.parentNode) { return; }
+      t.className += ' rsb-out';
+      setTimeout(function () { if (t.parentNode) { t.parentNode.removeChild(t); } }, 240);
+    };
+    t.querySelector('.rsb-toast__x').addEventListener('click', close);
+    if (action) {
+      var ab = document.createElement('button');
+      ab.type = 'button';
+      ab.className = 'rsb-toast__b';
+      ab.textContent = action.label;
+      ab.addEventListener('click', function () { close(); action.run(); });
+      t.querySelector('.rsb-toast__c').appendChild(ab);
+    }
+    toastBox.appendChild(t);
+    setTimeout(close, action ? 12000 : 6000);
+    try { if (navigator.vibrate && type === 'err') { navigator.vibrate([16, 40, 16]); } } catch (e) {}
+  }
+
+  /* --------------------- Обслуживание 10% --------------------- */
+  /* Считаем от суммы блюд и кладём в штатное поле Tilda tcart.delivery:
+     она сама покажет строку после суммы заказа, добавит её в итог,
+     в письмо заказа и в сумму к оплате. Поле доставки на сайте не занято. */
+  function serviceBase() {
+    var t = window.tcart;
+    if (!t) { return 0; }
+    var b = t.prodamount_withdiscount || t.prodamount_withdyndiscount || t.prodamount || 0;
+    b = parseFloat(b);
+    return b > 0 ? b : 0;
+  }
+  function serviceAmount(base) {
+    var v = base * CFG.service.percent / 100;
+    if (CFG.service.round === 'ceil') { return Math.ceil(v); }
+    if (CFG.service.round === 'none') { return Math.round(v * 100) / 100; }
+    return Math.round(v);
+  }
+  function applyService() {
+    if (!CFG.service || !CFG.service.percent) { return; }
+    var t = window.tcart;
+    if (!t || typeof t !== 'object') { return; }
+    var cur = (t.delivery && typeof t.delivery === 'object') ? t.delivery : null;
+    /* если на сайте когда-нибудь включат обычную доставку — не мешаем ей */
+    if (cur && cur.name && cur.name !== CFG.service.name) { return; }
+
+    var price = analyze().count > 0 ? serviceAmount(serviceBase()) : 0;
+    if (price > 0) {
+      if (cur && cur.name === CFG.service.name && Math.abs((+cur.price || 0) - price) < 0.005) { return; }
+      t.delivery = { name: CFG.service.name, price: price };
+    } else {
+      if (!cur) { return; }
+      try { delete t.delivery; } catch (e) { t.delivery = null; }
+    }
+    try { if (typeof window.tcart__updateTotalProductsinCartObj === 'function') { window.tcart__updateTotalProductsinCartObj(); } } catch (e) {}
+    try { if (typeof window.tcart__reDrawTotal === 'function') { window.tcart__reDrawTotal(); } } catch (e) {}
+  }
+
+  /* ------------------------- Панель --------------------------- */
+  var ICO_OK   = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7.2" stroke="currentColor" stroke-width="1.4"/><path d="M4.8 8.2l2.1 2.1 4.3-4.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICO_INFO = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2v4M8 4.6v.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+
+  var panels = [];   /* по одной панели на каждый блок корзины */
+  var sel = { day: null, time: null };
+  var prevConflict = false;
+  var lastBuild = '';
+
+  function plural(n, a, b, c) {
+    var n10 = n % 10, n100 = n % 100;
+    if (n10 === 1 && n100 !== 11) { return a; }
+    if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) { return b; }
+    return c;
+  }
+
+  function buildPanel(form) {
+    var p = document.createElement('div');
+    p.className = 'rsb-slots';
+    p.innerHTML =
+      '<div class="rsb-err" role="alert">' +
+        '<div class="rsb-err__t">' + ICO_ERR.replace('rsb-toast__i', '') + '<span>Завтраки нельзя заказать вместе с основным меню</span></div>' +
+        '<div class="rsb-err__d"></div>' +
+        '<div class="rsb-err__a">' +
+          '<button type="button" class="rsb-btn" data-rsb="keep-b">Оставить только завтраки</button>' +
+          '<button type="button" class="rsb-btn rsb-btn_gh" data-rsb="keep-m">Оставить основное меню</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="rsb-body">' +
+        '<div class="rsb-slots__head">' +
+          '<div class="rsb-slots__title">Время подачи в номер</div>' +
+          '<div class="rsb-clock"><i></i>' + CFG.city + '&nbsp;<b>--:--</b></div>' +
+        '</div>' +
+        '<div class="rsb-note"></div>' +
+        '<div class="rsb-label">Дата</div>' +
+        '<div class="rsb-row rsb-days"></div>' +
+        '<div class="rsb-label">Время</div>' +
+        '<div class="rsb-row rsb-times"></div>' +
+        '<div class="rsb-status"></div>' +
+      '</div>';
+    var o = {
+      root: p, form: form,
+      err: p.querySelector('.rsb-err'),
+      errd: p.querySelector('.rsb-err__d'),
+      body: p.querySelector('.rsb-body'),
+      clock: p.querySelector('.rsb-clock b'),
+      note: p.querySelector('.rsb-note'),
+      days: p.querySelector('.rsb-days'),
+      times: p.querySelector('.rsb-times'),
+      status: p.querySelector('.rsb-status'),
+      dayEls: [], timeEls: []
+    };
+    p.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-rsb]') : null;
+      if (!b) { return; }
+      e.preventDefault();
+      var a = b.getAttribute('data-rsb');
+      if (a === 'keep-b') { removeWhere(function (x) { return !isBreakfast(x); }); }
+      else if (a === 'keep-m') { removeWhere(function (x) { return isBreakfast(x); }); }
+      else if (a === 'day') { sel.day = b.getAttribute('data-key'); sel.time = null; render(true); }
+      else if (a === 'time') { sel.time = b.getAttribute('data-time'); render(true); }
+    });
+    return o;
+  }
+
+  function mountPanels() {
+    var forms = document.querySelectorAll('.t706 .t706__orderform'), i, host, o;
+    for (i = 0; i < forms.length; i++) {
+      host = forms[i];
+      o = host.__rsbPanel;
+      if (!o) {
+        o = buildPanel(host.querySelector('form') || host);
+        host.__rsbPanel = o;
+        panels.push(o);
+      }
+      if (o.root.parentNode !== host.parentNode) {
+        host.parentNode.insertBefore(o.root, host);
+        prepareNativeFields(o);
+      }
+    }
+  }
+
+  function nativeInput(o, name) {
+    var f = o.form || document;
+    return f.querySelector('input[name="' + name + '"]') ||
+           document.querySelector('.t706 input[name="' + name + '"]');
+  }
+  function prepareNativeFields(o) {
+    var d = nativeInput(o, CFG.fields.date), t = nativeInput(o, CFG.fields.time), g;
+    if (d) {
+      /* дату ставим мы, поэтому снимаем проверку «дата в прошлом»
+         (часовой пояс устройства гостя может отличаться от московского) */
+      d.removeAttribute('data-tilda-dateunvailable');
+      d.setAttribute('readonly', 'readonly');
+      if (CFG.hideNativeFields) { g = d.closest ? d.closest('.t-input-group') : null; if (g) { g.className += ' rsb-hidden-native'; } }
+    }
+    if (t) {
+      t.setAttribute('readonly', 'readonly');
+      if (CFG.hideNativeFields) { g = t.closest ? t.closest('.t-input-group') : null; if (g) { g.className += ' rsb-hidden-native'; } }
+    }
+  }
+  function setNative(o, dateVal, timeVal) {
+    var d = nativeInput(o, CFG.fields.date), t = nativeInput(o, CFG.fields.time);
+    [[d, dateVal], [t, timeVal]].forEach(function (pair) {
+      var el = pair[0], v = pair[1] == null ? '' : pair[1];
+      if (!el || el.value === v) { return; }
+      el.value = v;
+      try {
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      } catch (e) {
+        var ev = document.createEvent('HTMLEvents'); ev.initEvent('change', true, false); el.dispatchEvent(ev);
+      }
+      var grp = el.closest ? el.closest('.t-input-group') : null;
+      if (v && grp) {
+        grp.className = grp.className.replace(/\s*js-error-control-box\s*/g, ' ');
+        el.className = el.className.replace(/\s*t-input_has-error\s*/g, ' ');
+      }
+    });
+  }
+
+  /* Слоты выбранного меню на конкретный день */
+  function slotsFor(menuKey, day) {
+    var menu = CFG.menus[menuKey], n = now(), out = [], i, hm, ts, dl;
+    for (i = 0; i < menu.slots.length; i++) {
+      hm = menu.slots[i].split(':');
+      ts = mskEpoch(day.y, day.m, day.d, +hm[0], +hm[1]);
+      dl = ts - menu.lead * 60000;
+      out.push({ time: menu.slots[i], ts: ts, deadline: dl, ok: n <= dl });
+    }
+    return out;
+  }
+  function days() {
+    var a = [], i;
+    for (i = 0; i <= CFG.daysForward; i++) { a.push(dayInfo(i)); }
+    return a;
+  }
+
+  function setStatus(o, cls, icon, html) {
+    o.status.className = 'rsb-status' + (cls ? ' ' + cls : '');
+    o.status.innerHTML = icon + '<div>' + html + '</div>';
+  }
+
+  var raf = null;
+  function schedule() {
+    if (raf) { return; }
+    raf = (window.requestAnimationFrame || function (f) { return setTimeout(f, 16); })(function () {
+      raf = null; render(false);
+    });
+  }
+
+  function render(userAction) {
+    mountPanels();
+    applyService();
+    var st = analyze();
+
+    /* мгновенная ошибка при смешивании категорий */
+    if (st.conflict && !prevConflict) {
+      toast('Завтраки нельзя смешивать с основным меню',
+            'У них разное время подачи. Оформите два отдельных заказа.', 'err', 'mix');
+    }
+    prevConflict = st.conflict;
+
+    var i;
+    for (i = 0; i < panels.length; i++) { renderPanel(panels[i], st, userAction); }
+    updateSubmitState(st);
+  }
+
+  function renderPanel(o, st, userAction) {
+    var on = st.count > 0;
+    setCls(o.root, 'rsb-on', on);
+    if (!on) { setNative(o, '', ''); return; }
+
+    /* --- конфликт категорий --- */
+    if (st.conflict) {
+      o.err.className = 'rsb-err rsb-on';
+      o.body.style.display = 'none';
+      o.errd.textContent =
+        'В корзине ' + st.nb + ' ' + plural(st.nb, 'завтрак', 'завтрака', 'завтраков') +
+        ' и ' + st.nm + ' ' + plural(st.nm, 'блюдо', 'блюда', 'блюд') + ' основного меню. ' +
+        'Завтраки подаём с 8:00 до 10:00, остальные блюда — с 13:00 до 22:00, ' +
+        'поэтому их нельзя объединить в один заказ. Напитки, сырники и творожная запеканка ' +
+        'подаются в оба окна — их можно добавить к любому заказу.';
+      setNative(o, '', '');
+      return;
+    }
+    o.err.className = 'rsb-err';
+    o.body.style.display = '';
+
+    var menuKey = st.menu || 'main';
+    var menu = CFG.menus[menuKey];
+    var dl = days();
+    var sign = menuKey + '|' + dl[0].key + '|' + dl.length;
+
+    /* --- пересборка чипов (меню или календарная дата сменились) --- */
+    if (o.sign !== sign) {
+      o.sign = sign;
+      o.note.textContent = menu.note;
+      o.days.innerHTML = ''; o.dayEls = [];
+      for (var i = 0; i < dl.length; i++) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'rsb-chip';
+        b.setAttribute('data-rsb', 'day'); b.setAttribute('data-key', dl[i].key);
+        b.innerHTML = '<span>' + dl[i].title + '</span><span class="rsb-chip__sub">' + dl[i].sub + '</span>';
+        b.__day = dl[i];
+        o.days.appendChild(b); o.dayEls.push(b);
+      }
+      o.times.innerHTML = ''; o.timeEls = [];
+      var groups = slotGroups(menu.slots);
+      setCls(o.times, 'rsb-times_grouped', groups.length > 1);
+      for (var gi = 0; gi < groups.length; gi++) {
+        var host = o.times;
+        if (groups.length > 1) {
+          var wrap = document.createElement('div');
+          wrap.className = 'rsb-group';
+          var lab = document.createElement('span');
+          lab.className = 'rsb-glabel';
+          lab.textContent = groupLabel(groups[gi][0]);
+          wrap.appendChild(lab);
+          host = document.createElement('div');
+          host.className = 'rsb-row rsb-row_in';
+          wrap.appendChild(host);
+          o.times.appendChild(wrap);
+        }
+        for (var j = 0; j < groups[gi].length; j++) {
+          var t = document.createElement('button');
+          t.type = 'button'; t.className = 'rsb-chip';
+          t.setAttribute('data-rsb', 'time'); t.setAttribute('data-time', groups[gi][j]);
+          t.textContent = groups[gi][j];
+          host.appendChild(t); o.timeEls.push(t);
+        }
+      }
+      if (sel.day && !findDay(dl, sel.day)) { sel.day = null; sel.time = null; }
+    }
+
+    /* --- день по умолчанию: первый, где ещё есть свободные слоты.
+           Если на выбранной дате приём закрылся, пока гость выбирал, — переключаем сами --- */
+    var cd = findDay(dl, sel.day);
+    if (!cd || !hasFree(slotsFor(menuKey, cd))) {
+      var was = sel.day;
+      sel.day = dl[0].key;
+      for (var d1 = 0; d1 < dl.length; d1++) {
+        if (hasFree(slotsFor(menuKey, dl[d1]))) { sel.day = dl[d1].key; break; }
+      }
+      if (was && was !== sel.day) {
+        var nd = findDay(dl, sel.day);
+        toast('Приём заказов на эту дату закрыт',
+              'Перенесли выбор на «' + (nd ? nd.title.toLowerCase() : 'другую дату') + '».', 'err', 'dayshift' + sel.day);
+      }
+    }
+    var day = findDay(dl, sel.day) || dl[0];
+    var slots = slotsFor(menuKey, day);
+
+    /* --- часы --- */
+    var nowTxt = hhmm(now());
+    if (o.clock.textContent !== nowTxt) { o.clock.textContent = nowTxt; }
+
+    /* --- дни: доступность и выбор --- */
+    for (var k = 0; k < o.dayEls.length; k++) {
+      var de = o.dayEls[k], free = hasFree(slotsFor(menuKey, de.__day));
+      de.disabled = !free;
+      setCls(de, 'rsb-sel', de.__day.key === day.key);
+      de.title = free ? '' : 'На эту дату приём заказов уже закрыт';
+    }
+
+    /* --- слоты: доступность, выбор, подсказки --- */
+    var selValid = false, firstFree = -1;
+    for (var s = 0; s < slots.length; s++) {
+      var el = o.timeEls[s], it = slots[s];
+      el.disabled = !it.ok;
+      if (it.ok && firstFree === -1) { firstFree = s; }
+      var isSel = (sel.time === it.time);
+      if (isSel && it.ok) { selValid = true; }
+      setCls(el, 'rsb-sel', isSel && it.ok);
+      el.title = it.ok
+        ? ('Оформите заказ до ' + hhmm(it.deadline))
+        : 'Это время уже недоступно';
+    }
+    /* выбранный слот «сгорел», пока гость думал */
+    if (sel.time && !selValid) {
+      var expired = sel.time;
+      sel.time = null;
+      if (o.__lastExpired !== day.key + expired) {
+        o.__lastExpired = day.key + expired;
+        toast('Время ' + expired + ' больше недоступно',
+              'Пожалуйста, выберите другое время подачи.', 'err', 'exp' + expired);
+        shake(o.times);
+      }
+    }
+    for (var q = 0; q < o.timeEls.length; q++) { setCls(o.timeEls[q], 'rsb-hint', q === firstFree && !sel.time); }
+
+    /* --- статус --- */
+    if (firstFree === -1) {
+      setStatus(o, 'rsb-bad', ICO_ERR.replace('rsb-toast__i', ''),
+        'На <b>' + day.title.toLowerCase() + '</b> приём заказов уже закрыт. Выберите другую дату.');
+      setNative(o, '', '');
+    } else if (!sel.time) {
+      setStatus(o, '', ICO_INFO,
+        'Выберите время подачи в номер — ближайшее свободное <b>' + slots[firstFree].time + '</b>.');
+      setNative(o, '', '');
+    } else {
+      var cur = null;
+      for (var z = 0; z < slots.length; z++) { if (slots[z].time === sel.time) { cur = slots[z]; } }
+      var left = cur ? cur.deadline - now() : 0;
+      var txt = 'Подадим в номер <b>' + day.title.toLowerCase() + ' в ' + sel.time + '</b> по московскому времени.';
+      if (left < 15 * 60000) {
+        var mins = Math.max(0, Math.floor(left / 60000));
+        setStatus(o, 'rsb-warn', ICO_INFO, txt + ' Оформите заказ до <b>' + hhmm(cur.deadline) + '</b> — ' +
+          (mins > 0 ? ('осталось ' + mins + ' ' + plural(mins, 'минута', 'минуты', 'минут')) : 'меньше минуты') + '.');
+      } else {
+        setStatus(o, 'rsb-ok', ICO_OK, txt);
+      }
+      setNative(o, day.value, sel.time);
+    }
+    if (userAction && sel.time) { o.__lastExpired = null; }
+  }
+
+  /* Слоты разбиваем на периоды, если между ними есть перерыв:
+     утренние 8:00–10:00 и дневные 13:00–22:00 не должны сливаться в одну ленту */
+  function toMin(hhmm) { var a = hhmm.split(':'); return (+a[0]) * 60 + (+a[1]); }
+  function slotGroups(slots) {
+    var g = [], cur = [], i;
+    for (i = 0; i < slots.length; i++) {
+      if (cur.length && toMin(slots[i]) - toMin(slots[i - 1]) > 90) { g.push(cur); cur = []; }
+      cur.push(slots[i]);
+    }
+    if (cur.length) { g.push(cur); }
+    return g;
+  }
+  function groupLabel(first) {
+    var m = toMin(first);
+    if (m < 12 * 60) { return 'Утро'; }
+    if (m < 17 * 60) { return 'День'; }
+    return 'Вечер';
+  }
+
+  function findDay(list, key) { for (var i = 0; i < list.length; i++) { if (list[i].key === key) { return list[i]; } } return null; }
+  function hasFree(slots) { for (var i = 0; i < slots.length; i++) { if (slots[i].ok) { return true; } } return false; }
+  function setCls(el, cls, on) {
+    var has = (' ' + el.className + ' ').indexOf(' ' + cls + ' ') !== -1;
+    if (on && !has) { el.className += ' ' + cls; }
+    else if (!on && has) { el.className = (' ' + el.className + ' ').replace(' ' + cls + ' ', ' ').trim(); }
+  }
+  function shake(el) {
+    if (!el) { return; }
+    setCls(el, 'rsb-shake', false);
+    void el.offsetWidth;
+    setCls(el, 'rsb-shake', true);
+    setTimeout(function () { setCls(el, 'rsb-shake', false); }, 500);
+  }
+
+  /* --------------------- Блокировка отправки -------------------- */
+  function validate() {
+    var st = analyze();
+    if (st.count === 0 || panels.length === 0) { return { ok: true }; }
+    if (st.conflict) { return { ok: false, why: 'mix' }; }
+    var menuKey = st.menu || 'main';
+    var dl = days(), day = findDay(dl, sel.day) || dl[0];
+    if (!sel.time) { return { ok: false, why: 'notime' }; }
+    var slots = slotsFor(menuKey, day), i;
+    for (i = 0; i < slots.length; i++) {
+      if (slots[i].time === sel.time) {
+        if (!slots[i].ok) { return { ok: false, why: 'expired', time: sel.time, lead: CFG.menus[menuKey].lead }; }
+        setNativeAll(day.value, sel.time);
+        return { ok: true };
+      }
+    }
+    return { ok: false, why: 'notime' };
+  }
+  function setNativeAll(d, t) { for (var i = 0; i < panels.length; i++) { setNative(panels[i], d, t); } }
+
+  function updateSubmitState(st) {
+    var v = (st.count === 0) ? { ok: true } : validate();
+    var btns = document.querySelectorAll('.t706 .t-submit'), i;
+    for (i = 0; i < btns.length; i++) { setCls(btns[i], 'rsb-blocked', !v.ok && st.count > 0); }
+  }
+
+  function reportProblem(v) {
+    var p = panels[0], i;
+    for (i = 0; i < panels.length; i++) { if (panels[i].root.offsetParent !== null) { p = panels[i]; break; } }
+    if (v.why === 'mix') {
+      toast('Завтраки нельзя смешивать с основным меню',
+            'Уберите лишние позиции — кнопки для этого есть в корзине.', 'err', 'mix-submit');
+      if (p) { shake(p.err); }
+    } else if (v.why === 'expired') {
+      toast('Время ' + v.time + ' больше недоступно',
+            'Пожалуйста, выберите другое время подачи.', 'err', 'exp-submit');
+      if (p) { shake(p.times); }
+    } else {
+      toast('Выберите время подачи', 'Укажите, когда принести заказ в номер.', 'err', 'notime');
+      if (p) { shake(p.times); }
+    }
+    if (p && p.root.scrollIntoView) {
+      try { p.root.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      catch (e) { p.root.scrollIntoView(); }
+    }
+    render(true);
+  }
+
+  function inCart(el) { return !!(el && el.closest && el.closest('.t706')); }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('.t-submit, button[type="submit"]') : null;
+    if (!b || !inCart(b)) { return; }
+    var v = validate();
+    if (!v.ok) { e.preventDefault(); e.stopPropagation(); reportProblem(v); }
+  }, true);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.keyCode !== 13 && e.key !== 'Enter') { return; }
+    if (!inCart(e.target)) { return; }
+    if (e.target && e.target.tagName === 'TEXTAREA') { return; }
+    var v = validate();
+    if (!v.ok) { e.preventDefault(); e.stopPropagation(); reportProblem(v); }
+  }, true);
+
+  document.addEventListener('submit', function (e) {
+    if (!inCart(e.target)) { return; }
+    var v = validate();
+    if (!v.ok) { e.preventDefault(); e.stopImmediatePropagation(); reportProblem(v); }
+  }, true);
+
+  /* --------- Запрет добавления «несовместимого» товара --------- */
+  function wrapAdd() {
+    var f = window.tcart__addProduct;
+    if (typeof f !== 'function' || f.__rsb) { return; }
+    var wrapped = function (product) {
+      var args = arguments, self = this;
+      try {
+        var st = analyze();
+        var kind = kindOf(product);
+        /* Напитки, сырники и запеканка добавляются к любому заказу и не блокируются.
+           Блокируем, только если корзина точно не пуста: если сама Tilda показывает 0 позиций,
+           верим ей и пропускаем товар — конфликт всё равно поймает баннер в корзине.
+           Гость никогда не должен упереться в ошибку при пустой корзине. */
+        if (kind !== 'anytime' && (st.menu === 'breakfast' || st.menu === 'main') &&
+            st.menu !== kind && st.count > 0 && tildaCartCount() !== 0) {
+          var esc = { label: 'Очистить корзину и добавить', run: function () {
+            clearCart(function () { f.apply(self, args); schedule(); });
+          } };
+          if (kind === 'breakfast') {
+            toast('Завтрак нельзя добавить к этому заказу',
+                  'Завтраки подаются с 8:00 до 10:00 и оформляются отдельным заказом.', 'err', 'mix-add', esc);
+          } else {
+            toast('Это блюдо нельзя добавить к завтракам',
+                  'Основное меню подаётся с 13:00 до 22:00 и оформляется отдельным заказом.', 'err', 'mix-add', esc);
+          }
+          schedule();
+          return false;
+        }
+      } catch (err) { log('addProduct hook error', err); }
+      return f.apply(self, args);
+    };
+    wrapped.__rsb = true; wrapped.__orig = f;
+    window.tcart__addProduct = wrapped;
+    log('tcart__addProduct wrapped');
+  }
+  function wrapSave() {
+    var f = window.tcart__saveLocalObj;
+    if (typeof f !== 'function' || f.__rsb) { return; }
+    var wrapped = function () { var r = f.apply(this, arguments); schedule(); return r; };
+    wrapped.__rsb = true; wrapped.__orig = f;
+    window.tcart__saveLocalObj = wrapped;
+  }
+
+  /* ---------------------------- Старт --------------------------- */
+  function boot() {
+    var recs = document.querySelector('.t-records');
+    var mode = recs ? recs.getAttribute('data-tilda-mode') : '';
+    if (mode === 'edit' || mode === 'preview') { return; }   /* не мешаем редактору Tilda */
+
+    syncTime();
+    wrapAdd(); wrapSave();
+    mountPanels();
+    render(false);
+
+    /* реакция на любые изменения корзины */
+    var lastSign = cartSign();
+    setInterval(function () {
+      wrapAdd(); wrapSave();                     /* если Tilda переопределила функции */
+      var s = cartSign();
+      if (s !== lastSign) { lastSign = s; render(false); }
+    }, 500);
+
+    /* ежесекундный пересчёт доступности слотов */
+    setInterval(function () { render(false); }, 1000);
+
+    /* перерисовка корзины Tilda */
+    try {
+      var moT = 0;
+      var mo = new MutationObserver(function () {
+        if (moT) { return; }
+        moT = setTimeout(function () { moT = 0; mountPanels(); schedule(); }, 150);
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch (e) {}
+
+    window.addEventListener('storage', function (e) { if (!e.key || e.key.indexOf('tcart') === 0) { schedule(); } });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) { lastSync = 0; syncTime(); schedule(); }
+    });
+  }
+
+  /* Диагностика: выполнить RSB.state() в консоли браузера, если что-то ведёт себя неожиданно */
+  window.RSB = {
+    cfg: CFG,
+    clear: function () { clearCart(); return 'корзина очищается'; },
+    state: function () {
+      var raw = (window.tcart && window.tcart.products) ? window.tcart.products : null;
+      return {
+        времяМСК: hhmm(now()), поправкаЧасовСек: Math.round(skew / 1000),
+        счётчикTilda: tildaCartCount(),
+        позицийВОбъектеTilda: raw ? raw.length : null,
+        учтеноПозиций: cartProducts().length,
+        разбор: analyze(),
+        выбрано: { дата: sel.day, время: sel.time },
+        панелей: panels.length,
+        товары: cartProducts().map(function (p) {
+          return { название: p.name, кол: p.quantity, категория: kindOf(p), ссылка: p.url };
+        }),
+        сырыеПозиции: raw
+      };
+    }
+  };
+
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); }
+  else { boot(); }
+  window.addEventListener('load', function () { mountPanels(); wrapAdd(); wrapSave(); render(false); });
+})();
+</script>
+
+<script>
+(function () {
+  var MSK = 180; /* минут, UTC+3 */
+  function mskNow() { return new Date(Date.now() + MSK * 60000); }
+  function mskEpoch(y, m, d, hh, mm) { return Date.UTC(y, m - 1, d, hh, mm) - MSK * 60000; }
+  function two(n) { return n < 10 ? '0' + n : '' + n; }
+
+  var MENU_B = [
+    { n: 'Сытный сет «Русский завтрак» — Латте', p: 880, uid: '381821866163', u: '/tproduct/142718970583-sitnii-set-russkii-zavtrak?editionuid=381821866163' },
+    { n: 'Классический сет «Английский завтрак» — Американо', p: 950, uid: '737017368883', u: '/tproduct/296082006963-klassicheskii-set-angliiskii-zavtrak?editionuid=737017368883' },
+    { n: 'Изысканный сет «Скандинавский завтрак» — Капучино', p: 1050, uid: '596979002733', u: '/tproduct/847153183813-iziskannii-set-skandinavskii-zavtrak?editionuid=596979002733' },
+    { n: 'Шакшука', p: 320, uid: '523668981613', u: '/tproduct/523668981613-shakshuka' },
+    { n: 'Сэндвич со слабосолёным лососем', p: 380, uid: '781713795803', u: '/tproduct/781713795803-sendvich-so-slabosolyonim-lososem' },
+    { n: 'Овсяная каша с яблоками и мёдом — На цельном молоке', p: 260, uid: '332664047173', u: '/tproduct/351217116933-ovsyanaya-kasha-s-yablokami-i-myodom-bez?editionuid=332664047173' },
+  ];
+  var MENU_A = [
+    { n: 'Воздушные домашние сырники — Ягодный джем', p: 220, uid: '821698252483', u: '/tproduct/315374361683-vozdushnie-domashnie-sirniki-s-toppingom?editionuid=821698252483' },
+    { n: 'Нежная творожная запеканка — Сгущенное молоко', p: 390, uid: '992450061333', u: '/tproduct/378144183863-nezhnaya-tvorozhnaya-zapekanka-s-topping?editionuid=992450061333' }
+  ];
+  var MENU_M = [
+    { n: 'Борщ с говядиной и сметаной', p: 450, uid: '900000000001', u: '/tproduct/900000000001-borsch-s-govyadinoi' },
+    { n: 'Цезарь с курицей', p: 590, uid: '900000000002', u: '/tproduct/900000000002-cezar-s-kuritsei' },
+    { n: 'Стейк из лосося с овощами', p: 1290, uid: '900000000003', u: '/tproduct/900000000003-steik-iz-lososya' },
+    { n: 'Паста карбонара', p: 620, uid: '900000000004', u: '/tproduct/900000000004-pasta-karbonara' },
+    { n: 'Пельмени домашние со сметаной', p: 480, uid: '900000000005', u: '/tproduct/900000000005-pelmeni' }
+  ];
+  var MENU_D = [
+    { n: 'Капучино', p: 210, uid: '900000000101', u: '/tproduct/900000000101-kapuchino' },
+    { n: 'Эспрессо', p: 150, uid: '900000000102', u: '/tproduct/900000000102-espresso' },
+    { n: 'Чай черный крупнолистовой', p: 180, uid: '900000000103', u: '/tproduct/900000000103-chai-chernii' },
+    { n: 'Какао с маршмеллоу', p: 230, uid: '900000000104', u: '/tproduct/900000000104-kakao' },
+    { n: 'Морс ягодный, 0,5 л', p: 180, uid: '900000000105', u: '/tproduct/900000000105-mors-yagodnii' }
+  ];
+  var AKEYS = {};
+  MENU_A.forEach(function (x) { AKEYS[x.uid] = 1; });
+  var DKEYS = {};
+  MENU_D.forEach(function (x) { DKEYS[x.uid] = 1; });
+  var BKEYS = {};
+  MENU_B.forEach(function (x) { BKEYS[x.uid] = 1; });
+
+  var PRESETS = [
+    { t: '07:29', c: 'слот 8:00 ещё открыт' },
+    { t: '07:31', c: 'слот 8:00 закрыт' },
+    { t: '09:45', c: 'завтрак — на завтра' },
+    { t: '12:00', c: 'слот 13:00 открыт' },
+    { t: '12:31', c: 'слот 13:00 закрыт' },
+    { t: '21:30', c: 'кухня закрывается' }
+  ];
+  var DOWF = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+  var MONF = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+  var $ = function (id) { return document.getElementById(id); };
+  var rows = $('rows'), totalEl = $('total'), doneEl = $('done'), slider = $('tslider');
+
+  function dish(item, isB) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'dish';
+    b.innerHTML = '<span class="plus">+</span><span class="n"></span><span class="p"></span>';
+    b.querySelector('.n').textContent = item.n;
+    b.querySelector('.p').textContent = item.p + ' р.';
+    b.addEventListener('click', function () {
+      window.tcart__addProduct({
+        name: item.n, price: String(item.p), amount: item.p, quantity: 1,
+        uid: item.uid, url: 'https://roomservice-bereza.ru' + item.u, img: ''
+      });
+      window.tcart__saveLocalObj();
+      draw();
+    });
+    return b;
+  }
+  MENU_B.forEach(function (i) { $('menu-b').appendChild(dish(i, true)); });
+  MENU_M.forEach(function (i) { $('menu-m').appendChild(dish(i, false)); });
+  MENU_D.forEach(function (i) { $('menu-d').appendChild(dish(i, false)); });
+  MENU_A.forEach(function (i) { $('menu-a').appendChild(dish(i, false)); });
+
+  function draw() {
+    var ps = window.tcart.products, sum = 0;
+    rows.innerHTML = '';
+    if (!ps.length) {
+      var e = document.createElement('div');
+      e.className = 'pv-empty';
+      e.textContent = 'Пока пусто — добавьте блюда из меню слева.';
+      rows.appendChild(e);
+    }
+    ps.forEach(function (p, i) {
+      sum += (+p.price || 0) * (p.quantity || 1);
+      var r = document.createElement('div');
+      r.className = 'pv-row';
+      r.innerHTML = '<span class="nm"></span><span class="pr"></span>' +
+                    '<button class="rm" type="button" aria-label="Удалить">×</button>';
+      r.querySelector('.nm').innerHTML = '<span class="t"></span><span class="kind"></span>';
+      r.querySelector('.nm .t').textContent = p.name;
+      r.querySelector('.nm .kind').textContent =
+        AKEYS[p.uid] ? 'Утром и днём' : (BKEYS[p.uid] ? 'Завтрак' : (DKEYS[p.uid] ? 'Напиток' : 'Основное меню'));
+      r.querySelector('.pr').textContent = (+p.price || 0) + ' р.';
+      r.querySelector('.rm').addEventListener('click', function () {
+        window.tcart__deleteProduct(i); window.tcart__saveLocalObj(); draw();
+      });
+      rows.appendChild(r);
+    });
+    window.tcart__updateTotalProductsinCartObj();
+    drawTotals();
+    doneEl.className = 'pv-done';
+  }
+  function drawTotals() {
+    var t = window.tcart;
+    var srv = (t.delivery && t.delivery.price > 0) ? t.delivery : null;
+    $('srv-row').style.display = srv ? 'flex' : 'none';
+    if (srv) {
+      $('srv-name').textContent = srv.name;
+      $('srv-val').textContent = srv.price + ' р.';
+    }
+    totalEl.textContent = (t.prodamount || 0) + ' р.';
+    $('grand').textContent = (t.amount || 0) + ' р.';
+    $('grand-row').style.display = (t.products.length ? 'flex' : 'none');
+  }
+  window.__drawTotals = drawTotals;
+  draw();
+
+  /* --- часы --- */
+  var chipEls = [];
+  PRESETS.forEach(function (p) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = '<span class="mono"></span><small></small>';
+    b.querySelector('.mono').textContent = p.t;
+    b.querySelector('small').textContent = p.c;
+    b.addEventListener('click', function () { setTime(+p.t.slice(0, 2), +p.t.slice(3)); });
+    $('presets').appendChild(b); chipEls.push({ el: b, t: p.t });
+  });
+  var real = document.createElement('button');
+  real.type = 'button'; real.className = 'chip';
+  real.innerHTML = '<span class="mono">Сейчас</span><small>реальное время</small>';
+  real.addEventListener('click', function () { window.__realClock(); });
+  $('presets').appendChild(real);
+
+  function setTime(h, m) {
+    var d = mskNow();
+    window.__setClock(mskEpoch(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate(), h, m));
+  }
+  slider.addEventListener('input', function () {
+    var v = +slider.value; setTime(Math.floor(v / 60), v % 60);
+  });
+  $('fast').addEventListener('change', function () { window.__speed = this.checked ? 60 : 1; });
+
+  setTime(7, 31);
+
+  var dragging = false;
+  slider.addEventListener('pointerdown', function () { dragging = true; });
+  window.addEventListener('pointerup', function () { dragging = false; });
+
+  setInterval(function () {
+    var d = mskNow(), hh = d.getUTCHours(), mm = d.getUTCMinutes();
+    $('clock').textContent = two(hh) + ':' + two(mm) + ':' + two(d.getUTCSeconds());
+    $('clockday').textContent = DOWF[d.getUTCDay()] + ', ' + d.getUTCDate() + ' ' + MONF[d.getUTCMonth()];
+    if (!dragging) { slider.value = hh * 60 + mm; }
+    var cur = two(hh) + ':' + two(mm);
+    chipEls.forEach(function (c) { c.el.setAttribute('aria-pressed', c.t === cur ? 'true' : 'false'); });
+    var fd = document.querySelector('input[name="data_dostavki"]').value;
+    var ft = document.querySelector('input[name="vremya_dostavki"]').value;
+    $('f-date').textContent = fd || 'не выбрано'; $('f-date').className = fd ? '' : 'empty';
+    $('f-time').textContent = ft || 'не выбрано'; $('f-time').className = ft ? '' : 'empty';
+  }, 250);
+
+  $('demoform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fd = document.querySelector('input[name="data_dostavki"]').value;
+    var ft = document.querySelector('input[name="vremya_dostavki"]').value;
+    doneEl.textContent = 'Заказ оформлен. Подача в номер ' + fd + ' в ' + ft + ' — так это увидит кухня.';
+    doneEl.className = 'pv-done on';
+  });
+})();
+</script>

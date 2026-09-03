@@ -1,0 +1,336 @@
+<!-- ============================================================================
+     РУМ-СЕРВИС «БЕРЁЗА» — проверка сайта прямо в браузере.
+     ----------------------------------------------------------------------------
+     Куда вставлять: Настройки сайта → Ещё → HTML-код для вставки внутрь BODY.
+     Можно рядом с кодом корзины — они не конфликтуют.
+
+     Как пользоваться:
+       1. Открыть  https://roomservice-bereza.ru/?check=1
+       2. Дождаться, пока каталог прогрузится (5–10 секунд), прокрутить страницу
+          вниз до конца, чтобы подгрузились все фотографии.
+       3. В панели нажать «Скопировать отчёт» и прислать текст.
+
+     Что проверяет: формат и вес фотографий блюд, дубли каталога, шрифт,
+     ранние соединения, сжатие и кэш, работу корзины со слотами, аналитику
+     и реальную скорость первого экрана.
+
+     Обычные гости панель не видят. Выключить: ?check=0
+     ========================================================================= -->
+
+<script>
+(function () {
+  'use strict';
+  if (window.BCHECK) { return; }
+
+  var R = [];                       // строки отчёта
+  var box = null, busy = false;
+
+  function want() {
+    if (/[?&]check=1/.test(location.search)) { try { localStorage.setItem('bcheck', '1'); } catch (e) {} return true; }
+    if (/[?&]check=0/.test(location.search)) { try { localStorage.setItem('bcheck', '0'); } catch (e) {} return false; }
+    try { return localStorage.getItem('bcheck') === '1'; } catch (e) { return false; }
+  }
+  function kb(v) { return !v && v !== 0 ? '—' : (v < 1048576 ? Math.round(v / 1024) + ' КБ' : (v / 1048576).toFixed(2) + ' МБ'); }
+  function ms(v) { return (v === null || v === undefined) ? '—' : (v < 1000 ? Math.round(v) + ' мс' : (v / 1000).toFixed(2) + ' с'); }
+  function add(status, title, detail) { R.push({ s: status, t: title, d: detail || '' }); }
+
+  /* ------------------------- скорость ------------------------- */
+  var M = { fcp: null, lcp: null, catalog: null };
+  try {
+    new PerformanceObserver(function (l) {
+      l.getEntries().forEach(function (e) { if (e.name === 'first-contentful-paint') { M.fcp = e.startTime; } });
+    }).observe({ type: 'paint', buffered: true });
+    new PerformanceObserver(function (l) {
+      var es = l.getEntries(); M.lcp = es[es.length - 1].startTime;
+    }).observe({ type: 'largest-contentful-paint', buffered: true });
+  } catch (e) {}
+  var CARD = '.js-catalog-product, .t-catalog__card, .t-store__card, .js-product';
+  setInterval(function () {
+    if (M.catalog === null && document.querySelectorAll(CARD).length) { M.catalog = performance.now(); }
+  }, 300);
+
+  /* ------------------------ фотографии ------------------------ */
+  function photoUrls() {
+    var out = [], seen = {};
+    var nodes = document.querySelectorAll('.t-catalog [data-original], .t-store [data-original], ' +
+                                          '.t-catalog img, .t-store img, .js-product img, [data-original]');
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i];
+      var u = n.getAttribute('data-original') || n.getAttribute('src') || '';
+      if (!u || u.indexOf('data:') === 0) { continue; }
+      if (u.indexOf('-/resize') !== -1 || u.indexOf('-/empty') !== -1) { continue; }  // это заглушки
+      if (seen[u]) { continue; }
+      seen[u] = 1;
+      out.push({ url: u, w: n.naturalWidth || 0, box: Math.round(n.getBoundingClientRect().width) });
+    }
+    return out;
+  }
+
+  function measure(list, done) {
+    var res = [], i = 0, LIMIT = 60;
+    list = list.slice(0, LIMIT);
+    function next() {
+      if (i >= list.length) { return done(res); }
+      var it = list[i++];
+      var t0 = performance.now();
+      var got = { url: it.url, size: 0, type: '', box: it.box, w: it.w, ms: 0 };
+
+      /* настоящий размер кадра: у карточек Tilda картинка задана фоном,
+         поэтому спрашиваем размеры отдельно — из кэша это мгновенно */
+      function dims(cb) {
+        if (got.w) { return cb(); }
+        var img = new Image();
+        var t = setTimeout(function () { img.onload = img.onerror = null; cb(); }, 4000);
+        img.onload = function () { clearTimeout(t); got.w = img.naturalWidth; cb(); };
+        img.onerror = function () { clearTimeout(t); cb(); };
+        img.src = it.url;
+      }
+
+      fetch(it.url, { cache: 'force-cache', mode: 'cors' })
+        .then(function (r) { return r.blob(); })
+        .then(function (b) {
+          got.size = b.size; got.type = b.type; got.ms = performance.now() - t0;
+          dims(function () { res.push(got); next(); });
+        })['catch'](function () {
+          // без CORS размер не прочитать — берём из Resource Timing, если он есть
+          var e = performance.getEntriesByName(it.url)[0];
+          got.size = (e && e.transferSize) || 0;
+          dims(function () { res.push(got); next(); });
+        });
+    }
+    next();
+  }
+
+  function fmtOf(url, type) {
+    if (type) {
+      if (type.indexOf('webp') !== -1) { return 'webp'; }
+      if (type.indexOf('avif') !== -1) { return 'avif'; }
+      if (type.indexOf('png') !== -1) { return 'png'; }
+      if (type.indexOf('jpeg') !== -1 || type.indexOf('jpg') !== -1) { return 'jpeg'; }
+    }
+    var m = /\.(webp|avif|png|jpe?g)(\?|$)/i.exec(url);
+    return m ? m[1].toLowerCase().replace('jpg', 'jpeg') : '?';
+  }
+
+  /* ------------------------- проверки ------------------------- */
+  function runChecks(photos) {
+    R = [];
+    var nav = null;
+    try { nav = performance.getEntriesByType('navigation')[0]; } catch (e) {}
+
+    /* 1. фотографии блюд */
+    if (!photos.length) {
+      add('?', 'Фотографии блюд', 'на странице не найдено ни одной карточки — прокрутите каталог и запустите проверку заново');
+    } else {
+      var by = {}, total = 0, unknown = 0, heavy = [];
+      photos.forEach(function (p) {
+        var f = fmtOf(p.url, p.type);
+        by[f] = (by[f] || 0) + 1;
+        if (p.size) { total += p.size; } else { unknown++; }
+        heavy.push(p);
+      });
+      heavy.sort(function (a, b) { return b.size - a.size; });
+      var parts = [];
+      for (var k in by) { if (by.hasOwnProperty(k)) { parts.push(k + ': ' + by[k]); } }
+      var modern = (by.webp || 0) + (by.avif || 0);
+      var st = modern === photos.length ? 'ok' : (modern ? 'warn' : 'bad');
+      add(st, 'Формат фотографий (' + photos.length + ' шт.)', parts.join(', ') +
+          (modern === photos.length ? ' — все в современном формате' :
+           ' — в старом формате осталось ' + (photos.length - modern)));
+      var avg = photos.length ? total / (photos.length - unknown || 1) : 0;
+      add(avg && avg < 250 * 1024 ? 'ok' : (avg < 500 * 1024 ? 'warn' : 'bad'),
+          'Вес фотографий',
+          'всего ' + kb(total) + ', в среднем ' + kb(avg) + ' на фото' +
+          (unknown ? ' (' + unknown + ' не удалось измерить)' : ''));
+      var big = heavy.filter(function (p) { return p.size > 400 * 1024; });
+      if (big.length) {
+        add('warn', 'Самые тяжёлые фотографии',
+            big.slice(0, 5).map(function (p) {
+              return p.url.split('/').pop().slice(0, 40) + ' — ' + kb(p.size);
+            }).join('; '));
+      }
+      var over = photos.filter(function (p) { return p.box && p.w && p.w > p.box * 2.6; });
+      if (over.length) {
+        add('warn', 'Фото крупнее, чем нужно карточке',
+            over.length + ' шт. — например ' + over[0].w + ' точек при карточке в ' + over[0].box);
+      }
+    }
+
+    /* 2. каталог */
+    var cats = document.querySelectorAll('.t-catalog, .js-catalog').length;
+    var cards = document.querySelectorAll(CARD).length;
+    add(cats === 1 ? 'ok' : (cats === 0 ? '?' : 'bad'),
+        'Блоков каталога на странице: ' + cats,
+        cats === 1 ? 'дублирования нет, карточек показано ' + cards
+                   : (cats > 1 ? 'каталог собирается несколько раз — лишняя работа для телефона'
+                               : 'каталог не найден: проверка запущена не на странице меню?'));
+
+    /* 3. шрифт */
+    var gf = document.querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]');
+    if (!gf.length) {
+      add('ok', 'Шрифт', 'Google Fonts не подключён — шрифт отдаётся со своего домена');
+    } else {
+      var noswap = [];
+      for (var i = 0; i < gf.length; i++) {
+        if (gf[i].href.indexOf('display=swap') === -1) { noswap.push(gf[i].href); }
+      }
+      add(noswap.length ? 'bad' : 'warn', 'Шрифт с Google Fonts',
+          noswap.length ? 'без display=swap — текст скрыт, пока шрифт грузится'
+                        : 'с display=swap, текст виден сразу; в идеале перенести шрифт на свой домен');
+    }
+
+    /* 4. ранние соединения */
+    var pre = [];
+    document.querySelectorAll('link[rel="preconnect"], link[rel="dns-prefetch"]').forEach(function (l) {
+      var h = (l.getAttribute('href') || '').replace('https://', '');
+      if (pre.indexOf(h) === -1) { pre.push(h); }
+    });
+    var needed = ['store.tildaapi.com', 'static.tildacdn.com'];
+    var missing = needed.filter(function (h) { return pre.join(' ').indexOf(h) === -1; });
+    add(missing.length ? 'warn' : 'ok', 'Ранние соединения',
+        pre.length ? pre.join(', ') + (missing.length ? ' — нет: ' + missing.join(', ') : '') : 'не настроены');
+
+    /* 5. сжатие и кэш страницы */
+    if (nav) {
+      var enc = nav.encodedBodySize, dec = nav.decodedBodySize;
+      if (dec) {
+        add(enc && enc < dec * 0.6 ? 'ok' : 'bad', 'Сжатие страницы',
+            enc ? kb(enc) + ' вместо ' + kb(dec) + ' (' + Math.round(100 - enc * 100 / dec) + '% экономии)'
+                : 'не определяется');
+      }
+      add('ok', 'Протокол', (nav.nextHopProtocol || '—') + ', ответ сервера ' + ms(nav.responseStart));
+    }
+    var cached = 0, resList = [];
+    try { resList = performance.getEntriesByType('resource'); } catch (e) {}
+    resList.forEach(function (r) { if (r.transferSize === 0 && r.decodedBodySize > 0) { cached++; } });
+    if (resList.length) {
+      add(cached > resList.length * 0.3 ? 'ok' : 'warn', 'Кэш браузера',
+          cached + ' из ' + resList.length + ' файлов взяты из кэша' +
+          (cached ? '' : ' — при повторном заходе всё качается заново'));
+    }
+
+    /* 6. корзина со слотами */
+    if (window.RSB && typeof window.RSB.state === 'function') {
+      var st2 = {};
+      try { st2 = window.RSB.state(); } catch (e) {}
+      add('ok', 'Корзина со слотами подачи',
+          'работает; время ' + (st2['времяМСК'] || '?') +
+          ', поправка часов ' + (st2['поправкаЧасовСек'] || 0) + ' с' +
+          ', позиций в корзине ' + (st2['учтеноПозиций'] === undefined ? '?' : st2['учтеноПозиций']));
+    } else if (window.__RSB_CART__) {
+      add('warn', 'Корзина со слотами подачи', 'код загружен, но диагностика недоступна — обновите его до последней версии');
+    } else {
+      add('bad', 'Корзина со слотами подачи', 'код не найден на странице');
+    }
+
+    /* 7. аналитика */
+    add(window.ym || window.Ya ? 'ok' : 'warn', 'Счётчик посещаемости',
+        window.ym || window.Ya ? 'Яндекс.Метрика установлена' : 'не установлена — скорость у гостей не измеряется');
+
+    /* 8. скорость */
+    add(M.lcp && M.lcp < 2500 ? 'ok' : (M.lcp && M.lcp < 4000 ? 'warn' : 'bad'), 'Первый экран',
+        'первая отрисовка ' + ms(M.fcp) + ', главный элемент ' + ms(M.lcp));
+    add(M.catalog && M.catalog < 3000 ? 'ok' : 'warn', 'Каталог',
+        'первая карточка через ' + ms(M.catalog) + ', всего карточек ' + cards);
+
+    var tot = 0, hosts = {};
+    resList.forEach(function (r) {
+      tot += r.transferSize || 0;
+      try { hosts[new URL(r.name).hostname] = 1; } catch (e) {}
+    });
+    add('ok', 'Всего загружено', kb(tot + (nav ? nav.transferSize || 0 : 0)) +
+        ' с ' + Object.keys(hosts).length + ' доменов, файлов ' + resList.length);
+  }
+
+  /* ------------------------- отрисовка ------------------------ */
+  var ICON = { ok: '✓', warn: '!', bad: '✕', '?': '?' };
+  function draw() {
+    if (!box) {
+      var css = document.createElement('style');
+      css.textContent =
+        '#bcheck{position:fixed;z-index:2147483000;right:14px;bottom:14px;width:390px;max-width:calc(100vw - 28px);' +
+        'max-height:calc(100vh - 28px);overflow:auto;background:#111;color:#fff;border-radius:14px;padding:16px 18px;' +
+        'font-family:Jost,Arial,sans-serif;font-size:13.5px;line-height:1.4;box-shadow:0 14px 44px rgba(0,0,0,.4)}' +
+        '#bcheck h4{margin:0 0 12px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;font-weight:500;' +
+        'display:flex;justify-content:space-between;align-items:center}' +
+        '#bcheck .x{background:none;border:0;color:#fff;opacity:.6;cursor:pointer;font-size:17px;line-height:1;padding:0 2px}' +
+        '#bcheck .row{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08)}' +
+        '#bcheck .row:last-of-type{border-bottom:0}' +
+        '#bcheck .i{flex:0 0 18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;margin-top:1px}' +
+        '#bcheck .i.ok{background:#1f7a37}#bcheck .i.warn{background:#8a6100}#bcheck .i.bad{background:#a32c2b}#bcheck .i.q{background:#3a3a3a}' +
+        '#bcheck .t{font-weight:500}#bcheck .d{opacity:.7;font-size:12.5px;margin-top:2px;overflow-wrap:anywhere}' +
+        '#bcheck .btns{display:flex;gap:8px;margin-top:14px}' +
+        '#bcheck button.b{flex:1;font:inherit;font-size:13px;padding:10px;border-radius:22px;border:1px solid rgba(255,255,255,.5);' +
+        'background:transparent;color:#fff;cursor:pointer}' +
+        '#bcheck button.b:hover{background:#fff;color:#111}' +
+        '#bcheck .busy{opacity:.6;font-size:12.5px;margin-top:10px}';
+      (document.head || document.documentElement).appendChild(css);
+      box = document.createElement('div');
+      box.id = 'bcheck';
+      document.body.appendChild(box);
+    }
+    var ok = R.filter(function (r) { return r.s === 'ok'; }).length;
+    var html = '<h4><span>Проверка сайта · ' + ok + ' из ' + R.length + '</span>' +
+               '<button class="x" type="button" title="Закрыть">×</button></h4>';
+    R.forEach(function (r) {
+      html += '<div class="row"><span class="i ' + (r.s === '?' ? 'q' : r.s) + '">' + ICON[r.s] + '</span>' +
+              '<span><span class="t"></span><span class="d"></span></span></div>';
+    });
+    html += '<div class="btns"><button class="b" data-a="run" type="button">Проверить заново</button>' +
+            '<button class="b" data-a="copy" type="button">Скопировать отчёт</button></div>' +
+            (busy ? '<div class="busy">Измеряю фотографии…</div>' : '');
+    box.innerHTML = html;
+    var rows = box.querySelectorAll('.row');
+    R.forEach(function (r, i) {
+      rows[i].querySelector('.t').textContent = r.t;
+      rows[i].querySelector('.d').textContent = r.d;
+    });
+    box.querySelector('.x').onclick = function () {
+      try { localStorage.setItem('bcheck', '0'); } catch (e) {}
+      box.parentNode.removeChild(box); box = null;
+    };
+    box.querySelector('[data-a="run"]').onclick = function () { start(); };
+    box.querySelector('[data-a="copy"]').onclick = function (e) {
+      var txt = text();
+      var b = e.target;
+      function done() { b.textContent = 'Скопировано'; setTimeout(function () { b.textContent = 'Скопировать отчёт'; }, 2000); }
+      if (navigator.clipboard) { navigator.clipboard.writeText(txt).then(done, fallback); } else { fallback(); }
+      function fallback() {
+        var ta = document.createElement('textarea');
+        ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch (err) { window.prompt('Скопируйте текст:', txt); }
+        document.body.removeChild(ta);
+      }
+    };
+  }
+
+  function text() {
+    var s = 'ПРОВЕРКА САЙТА ' + location.href + '\n' + new Date().toString() + '\n' +
+            'Экран ' + window.innerWidth + '×' + window.innerHeight + ', ' +
+            (navigator.userAgent || '') + '\n\n';
+    R.forEach(function (r) { s += (r.s === 'ok' ? '[OK]  ' : r.s === 'warn' ? '[!]   ' : r.s === 'bad' ? '[X]   ' : '[?]   ') + r.t + (r.d ? ' — ' + r.d : '') + '\n'; });
+    return s;
+  }
+
+  function start() {
+    busy = true;
+    runChecks([]);
+    draw();
+    measure(photoUrls(), function (photos) {
+      busy = false;
+      runChecks(photos);
+      draw();
+      if (window.console && console.table) { console.table(photos.map(function (p) {
+        return { файл: p.url.split('/').pop(), формат: fmtOf(p.url, p.type), КБ: Math.round(p.size / 1024) };
+      })); }
+    });
+  }
+
+  window.BCHECK = { run: start, text: text, photos: photoUrls,
+                    panel: function (on) { try { localStorage.setItem('bcheck', on ? '1' : '0'); } catch (e) {} if (on) { start(); } } };
+
+  function boot() { if (want()) { setTimeout(start, 3500); } }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+})();
+</script>
